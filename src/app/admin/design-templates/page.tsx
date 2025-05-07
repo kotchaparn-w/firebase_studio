@@ -41,7 +41,7 @@ export default function DesignTemplatesPage() {
       name: '',
       imageUrl: '',
       dataAiHint: '',
-      featuredOccasion: '', // Empty string represents "None" logically in the form state
+      featuredOccasion: NONE_VALUE, // Use placeholder value for default representing "None"
     }
   });
 
@@ -53,12 +53,12 @@ export default function DesignTemplatesPage() {
         name: template.name,
         imageUrl: template.imageUrl,
         dataAiHint: template.dataAiHint || '',
-        featuredOccasion: template.featuredOccasion || '', // Use empty string if undefined/null
+        featuredOccasion: template.featuredOccasion || NONE_VALUE, // Use placeholder if undefined/null
       });
     } else {
       setEditingTemplate(null);
-      // Reset with empty string for featuredOccasion, matching defaultValues
-      form.reset({ name: '', imageUrl: 'https://picsum.photos/seed/newTemplate/600/370', dataAiHint: '', featuredOccasion: '' });
+      // Reset with placeholder for featuredOccasion
+      form.reset({ name: '', imageUrl: 'https://picsum.photos/seed/newTemplate/600/370', dataAiHint: '', featuredOccasion: NONE_VALUE });
     }
     setIsFormOpen(true);
   };
@@ -80,7 +80,7 @@ export default function DesignTemplatesPage() {
     }
     setIsFormOpen(false);
     setEditingTemplate(null);
-    form.reset({ name: '', imageUrl: '', dataAiHint: '', featuredOccasion: '' }); // Reset form after submit
+    form.reset({ name: '', imageUrl: '', dataAiHint: '', featuredOccasion: NONE_VALUE }); // Reset form after submit
   };
 
   const handleDelete = (templateId: string) => {
@@ -107,7 +107,7 @@ export default function DesignTemplatesPage() {
             <Dialog open={isFormOpen} onOpenChange={(isOpen) => {
               setIsFormOpen(isOpen);
               if (!isOpen) {
-                form.reset({ name: '', imageUrl: '', dataAiHint: '', featuredOccasion: '' }); // Ensure reset on close
+                form.reset({ name: '', imageUrl: '', dataAiHint: '', featuredOccasion: NONE_VALUE }); // Ensure reset on close
                 setEditingTemplate(null);
               }
             }}>
@@ -117,7 +117,8 @@ export default function DesignTemplatesPage() {
                   Add New Template
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
+              {/* Increase max-width here */}
+              <DialogContent className="sm:max-w-2xl">
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)}>
                     <DialogHeader>
@@ -172,11 +173,7 @@ export default function DesignTemplatesPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Featured Occasion (Optional)</FormLabel>
-                            {/* Map empty string form state to NONE_VALUE for Select, and vice-versa */}
-                            <Select
-                              onValueChange={(value) => field.onChange(value === NONE_VALUE ? '' : value)}
-                              value={field.value === '' ? NONE_VALUE : field.value || NONE_VALUE}
-                            >
+                            <Select onValueChange={field.onChange} value={field.value || NONE_VALUE}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select a featured occasion (or None)" />
