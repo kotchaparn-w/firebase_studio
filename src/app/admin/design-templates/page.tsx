@@ -26,9 +26,8 @@ const templateFormSchema = z.object({
 
 type TemplateFormValues = z.infer<typeof templateFormSchema>;
 
-// Removed the empty string "" from the end of this array
 const occasionsForFeatured = ["Birthday", "Anniversary", "Thank You", "Congratulations", "Holiday", "Just Because", "Unbirthday", "Other"];
-
+const NONE_VALUE = "__NONE__"; // Placeholder value for the "None" option in Select
 
 export default function DesignTemplatesPage() {
   const [templates, setTemplates] = useState<DesignTemplate[]>(initialDesignTemplates);
@@ -42,7 +41,7 @@ export default function DesignTemplatesPage() {
       name: '',
       imageUrl: '',
       dataAiHint: '',
-      featuredOccasion: '',
+      featuredOccasion: '', // Empty string represents "None" logically in the form state
     }
   });
 
@@ -54,26 +53,34 @@ export default function DesignTemplatesPage() {
         name: template.name,
         imageUrl: template.imageUrl,
         dataAiHint: template.dataAiHint || '',
-        featuredOccasion: template.featuredOccasion || '',
+        featuredOccasion: template.featuredOccasion || '', // Use empty string if undefined/null
       });
     } else {
       setEditingTemplate(null);
+      // Reset with empty string for featuredOccasion, matching defaultValues
       form.reset({ name: '', imageUrl: 'https://picsum.photos/seed/newTemplate/600/370', dataAiHint: '', featuredOccasion: '' });
     }
     setIsFormOpen(true);
   };
 
   const onSubmit = (values: TemplateFormValues) => {
+     // Ensure empty string is saved if "None" was selected, not the placeholder
+    const saveData = {
+      ...values,
+      featuredOccasion: values.featuredOccasion === NONE_VALUE ? '' : values.featuredOccasion,
+    };
+
     if (editingTemplate) {
-      setTemplates(templates.map(t => t.id === editingTemplate.id ? { ...t, ...values, id: t.id } : t));
-      toast({ title: "Template Updated", description: `"${values.name}" has been updated.` });
+      setTemplates(templates.map(t => t.id === editingTemplate.id ? { ...t, ...saveData, id: t.id } : t));
+      toast({ title: "Template Updated", description: `"${saveData.name}" has been updated.` });
     } else {
       const newId = `template_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-      setTemplates([...templates, { ...values, id: newId }]);
-      toast({ title: "Template Added", description: `"${values.name}" has been added.` });
+      setTemplates([...templates, { ...saveData, id: newId }]);
+      toast({ title: "Template Added", description: `"${saveData.name}" has been added.` });
     }
     setIsFormOpen(false);
     setEditingTemplate(null);
+    form.reset({ name: '', imageUrl: '', dataAiHint: '', featuredOccasion: '' }); // Reset form after submit
   };
 
   const handleDelete = (templateId: string) => {
@@ -100,7 +107,7 @@ export default function DesignTemplatesPage() {
             <Dialog open={isFormOpen} onOpenChange={(isOpen) => {
               setIsFormOpen(isOpen);
               if (!isOpen) {
-                form.reset();
+                form.reset({ name: '', imageUrl: '', dataAiHint: '', featuredOccasion: '' }); // Ensure reset on close
                 setEditingTemplate(null);
               }
             }}>
@@ -165,18 +172,20 @@ export default function DesignTemplatesPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Featured Occasion (Optional)</FormLabel>
-                            {/* Use field.value which can be undefined/null/empty string */}
-                            <Select onValueChange={field.onChange} value={field.value || ''}>
+                            {/* Map empty string form state to NONE_VALUE for Select, and vice-versa */}
+                            <Select
+                              onValueChange={(value) => field.onChange(value === NONE_VALUE ? '' : value)}
+                              value={field.value === '' ? NONE_VALUE : field.value || NONE_VALUE}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select a featured occasion (or None)" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                 {/* Add an explicit "None" option */}
-                                <SelectItem value="">None</SelectItem>
+                                 {/* Use a non-empty placeholder value */}
+                                <SelectItem value={NONE_VALUE}>None</SelectItem>
                                 {occasionsForFeatured.map(occ => (
-                                  // Use occ as value, which is guaranteed not to be empty now
                                   <SelectItem key={occ} value={occ}>{occ}</SelectItem>
                                 ))}
                               </SelectContent>
@@ -215,7 +224,8 @@ export default function DesignTemplatesPage() {
                   <CardContent className="p-4 flex-grow flex flex-col justify-between">
                     <div>
                       <h3 className="font-semibold text-lg text-foreground">{template.name}</h3>
-                      {template.featuredOccasion && <p className="text-xs text-muted-foreground mb-2">Featured: {template.featuredOccasion}</p>}
+                      {/* Display "None" or the occasion */}
+                      <p className="text-xs text-muted-foreground mb-2">Featured: {template.featuredOccasion || 'None'}</p>
                     </div>
                     <div className="flex justify-end space-x-2 mt-auto">
                       <Button variant="outline" size="sm" aria-label={`Edit ${template.name}`} onClick={() => handleOpenForm(template)}>
