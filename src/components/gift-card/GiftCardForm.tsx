@@ -13,7 +13,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import Image from 'next/image';
 
-// Schema remains the same
+// Schema updated to make deliveryEmail mandatory
 const formSchema = z.object({
   recipientName: z.string().min(2, { message: "Recipient's name must be at least 2 characters." }),
   senderName: z.string().min(2, { message: "Sender's name must be at least 2 characters." }),
@@ -21,7 +21,7 @@ const formSchema = z.object({
   amount: z.number().min(10, { message: "Amount must be at least $10." }).max(500, { message: "Amount cannot exceed $500." }),
   occasion: z.string().min(1, { message: "Please select an occasion." }),
   designId: z.string().min(1, { message: "Please select a design." }),
-  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }).optional().or(z.literal('')),
+  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }), // Mandatory
   noteToStaff: z.string().max(150, { message: "Note to staff cannot exceed 150 characters." }).optional(),
 });
 
@@ -39,9 +39,6 @@ const occasions = ["Birthday", "Anniversary", "Thank You", "Congratulations", "H
 // Use the passed form instance directly
 export default function GiftCardForm({ form, designTemplates, onFormChange }: GiftCardFormProps) {
 
-  // Remove the internal useForm hook
-  // const form = useForm<GiftCardFormValues>({ ... });
-
   // Keep the effect to notify parent of changes if needed, but preview syncs via watch in parent
   useEffect(() => {
     const subscription = form.watch((value) => {
@@ -56,10 +53,6 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
       form.setValue('designId', designTemplates[0].id, { shouldValidate: false }); // Avoid redundant validation
     }
   }, [designTemplates, form]);
-
-
-  // Remove internal submit handler, form doesn't submit itself directly
-  // const processSubmit = (values: GiftCardFormValues) => { ... };
 
   return (
     // Use the passed form instance here
@@ -199,11 +192,11 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
           name="deliveryEmail"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Recipient's Email (for e-delivery, optional)</FormLabel>
+              <FormLabel>Recipient's Email (for e-delivery)</FormLabel>
               <FormControl>
                 <Input type="email" placeholder="recipient@example.com" {...field} />
               </FormControl>
-              <FormDescription>Leave blank if you prefer to download and print.</FormDescription>
+              {/* Removed optional description */}
               <FormMessage />
             </FormItem>
           )}

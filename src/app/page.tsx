@@ -23,7 +23,7 @@ const formSchema = z.object({
   amount: z.number().min(10, { message: "Amount must be at least $10." }).max(500, { message: "Amount cannot exceed $500." }),
   occasion: z.string().min(1, { message: "Please select an occasion." }),
   designId: z.string().min(1, { message: "Please select a design." }),
-  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }).optional().or(z.literal('')),
+  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }), // Made mandatory
   noteToStaff: z.string().max(150, { message: "Note to staff cannot exceed 150 characters." }).optional(),
 });
 
@@ -39,7 +39,7 @@ export default function HomePage() {
       ...initialGiftCardData,
       designId: initialDesignTemplates.length > 0 ? initialDesignTemplates[0].id : '',
     },
-    mode: 'onChange', // Optional: Validate on change
+    mode: 'onChange', // Validate on change/blur for immediate feedback
   });
   // Gift card data for preview is derived from form state
   const [giftCardData, setGiftCardData] = useState<GiftCardData>(form.getValues());
@@ -87,8 +87,10 @@ export default function HomePage() {
         variant: "destructive",
       });
       // Focus on the first error field (optional, requires knowing the field names)
-      // Example: const firstError = Object.keys(form.formState.errors)[0];
-      // if (firstError) document.getElementsByName(firstError)[0]?.focus();
+      const firstErrorField = Object.keys(form.formState.errors)[0] as keyof GiftCardFormValues | undefined;
+      if (firstErrorField) {
+         form.setFocus(firstErrorField);
+      }
     }
   };
 
@@ -119,16 +121,18 @@ export default function HomePage() {
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-        <Card className={`${!isMobile ? 'lg:sticky top-24' : ''} shadow-xl`}>
-           <CardHeader>
-            <CardTitle className="font-heading text-3xl">Live Preview</CardTitle>
-            <CardDescription>See your gift card design update in real-time.</CardDescription>
-          </CardHeader>
-          <CardContent>
-             {/* Preview uses the watched giftCardData state */}
-            <GiftCardPreview data={giftCardData} designTemplates={designTemplates} />
-          </CardContent>
-        </Card>
+        {/* Preview uses the watched giftCardData state */}
+        <div className={`${!isMobile ? 'lg:sticky top-24' : ''} shadow-xl`}>
+          <Card>
+             <CardHeader>
+              <CardTitle className="font-heading text-3xl">Live Preview</CardTitle>
+              <CardDescription>See your gift card design update in real-time.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <GiftCardPreview data={giftCardData} designTemplates={designTemplates} />
+            </CardContent>
+          </Card>
+         </div>
 
         <div className="space-y-6">
           <Card className="shadow-xl">
