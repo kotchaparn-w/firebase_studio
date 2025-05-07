@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import type { GiftCardData } from '@/lib/types';
+import type { GiftCardData, DesignTemplate } from '@/lib/types';
 import { initialGiftCardData } from '@/lib/types';
+import { initialDesignTemplates } from '@/lib/mockData';
 import CheckoutSummary from '@/components/checkout/CheckoutSummary';
 import PaymentForm from '@/components/checkout/PaymentForm';
 import { Button } from '@/components/ui/button';
@@ -10,24 +11,32 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { createPaymentIntent, confirmPaymentIntent } from '@/services/stripe';
 import { sendEmail } from '@/services/email';
 import { generateGiftCardPdf } from '@/services/pdf-generator';
+import { generateGiftCardNumber } from '@/lib/utils';
 
 function CheckoutPageContent() {
   const [giftCardData, setGiftCardData] = useState<GiftCardData>(initialGiftCardData);
+  const [designTemplates] = useState<DesignTemplate[]>(initialDesignTemplates); 
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     const storedData = localStorage.getItem('giftCardData');
     if (storedData) {
       try {
-        setGiftCardData(JSON.parse(storedData));
+        const parsedData: GiftCardData = JSON.parse(storedData);
+        if (!parsedData.designId && designTemplates.length > 0) {
+            parsedData.designId = designTemplates[0].id;
+        } else if (!parsedData.designId && designTemplates.length === 0) {
+            // Fallback if no templates, though designTemplates is static here.
+            parsedData.designId = 'template1'; // Default to a known ID or handle error
+        }
+        setGiftCardData(parsedData);
       } catch (error) {
         console.error("Failed to parse gift card data from localStorage", error);
         toast({
@@ -38,50 +47,70 @@ function CheckoutPageContent() {
         router.push('/');
       }
     } else {
-        // If no data, redirect to home.
-        // This check can be more robust in a real app.
         router.push('/');
     }
-  }, [router, toast]);
+  }, [router, toast, designTemplates]);
 
   const handlePaymentSuccess = async (paymentMethodId: string) => {
     setIsLoading(true);
-    try {
-      // Step 1: Create Payment Intent
-      const paymentIntent = await createPaymentIntent(giftCardData.amount * 100, 'usd'); // amount in cents
+    
+    const finalGiftCardData: GiftCardData = {
+        ...giftCardData,
+        id: `gc_${Date.now()}`, 
+        cardNumber: generateGiftCardNumber(giftCardData),
+        purchaseDate: new Date().toISOString(),
+        status: 'active',
+        paymentMethodLast4: paymentMethodId.length > 4 ? paymentMethodId.slice(-4) : "XXXX" 
+    };
 
-      // Step 2: Confirm Payment Intent (mocked)
-      // In a real Stripe integration, you'd use paymentIntent.clientSecret on the frontend
-      // and then confirm on backend or handle webhooks.
-      // Here, we simulate confirmation.
+    try {
+      const paymentIntent = await createPaymentIntent(finalGiftCardData.amount * 100, 'usd');
       const confirmedIntent = await confirmPaymentIntent(paymentIntent.id);
 
       if (confirmedIntent.status === 'succeeded') {
-        // Step 3: Generate PDF (mocked)
+        
+        // TODO: Save `finalGiftCardData` to MongoDB via an API call
+        console.log("Mock: Gift card data to save to DB:", finalGiftCardData);
+        const existingPurchasesString = localStorage.getItem('mockPurchasedCards');
+        let existingPurchases: GiftCardData[] = [];
+        if(existingPurchasesString) {
+            try {
+                existingPurchases = JSON.parse(existingPurchasesString);
+            } catch(e) {
+                console.error("Error parsing mockPurchasedCards from localStorage", e);
+                existingPurchases = []; // reset if parsing fails
+            }
+        }
+        // Ensure existingPurchases is an array
+        if(!Array.isArray(existingPurchases)) {
+            existingPurchases = [];
+        }
+        localStorage.setItem('mockPurchasedCards', JSON.stringify([...existingPurchases, finalGiftCardData]));
+
+
         const pdfBuffer = await generateGiftCardPdf(
-          giftCardData.recipientName,
-          giftCardData.message,
-          giftCardData.amount,
-          giftCardData.occasion,
-          giftCardData.noteToStaff || ''
+          finalGiftCardData.recipientName,
+          finalGiftCardData.message,
+          finalGiftCardData.amount,
+          finalGiftCardData.occasion,
+          finalGiftCardData.noteToStaff || '',
+          finalGiftCardData.designId,
+          finalGiftCardData.cardNumber || 'N/A'
         );
         const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
 
-        // Step 4: Send Email (mocked)
-        if (giftCardData.deliveryEmail) {
+        if (finalGiftCardData.deliveryEmail) {
           await sendEmail(
-            giftCardData.deliveryEmail,
-            `Your Gift Card from ${giftCardData.senderName}`,
-            `Dear ${giftCardData.recipientName},\n\nYou have received a gift card for The Luxurious Spa for $${giftCardData.amount}.\n\nMessage: ${giftCardData.message}\n\nOccasion: ${giftCardData.occasion}\n\nEnjoy your luxurious experience!\n\nFrom, ${giftCardData.senderName}`
-            // In a real app, you'd attach the PDF or provide a download link
+            finalGiftCardData.deliveryEmail,
+            `Your Gift Card from ${finalGiftCardData.senderName}`,
+            `Dear ${finalGiftCardData.recipientName},\n\nYou have received a gift card for The Luxurious Spa for $${finalGiftCardData.amount}.\n\nMessage: ${finalGiftCardData.message}\n\nOccasion: ${finalGiftCardData.occasion}\nCard Number: ${finalGiftCardData.cardNumber}\n\nEnjoy your luxurious experience!\n\nFrom, ${finalGiftCardData.senderName}`
           );
         }
         
-        localStorage.removeItem('giftCardData'); // Clear data after successful order
-        // Navigate to success page, pass PDF URL and email status
-        router.push(`/order-confirmation?pdfUrl=${encodeURIComponent(pdfUrl)}&emailSent=${!!giftCardData.deliveryEmail}`);
+        localStorage.removeItem('giftCardData'); 
+        router.push(`/order-confirmation?pdfUrl=${encodeURIComponent(pdfUrl)}&emailSent=${!!finalGiftCardData.deliveryEmail}`);
         
         toast({
           title: "Payment Successful!",
@@ -103,9 +132,13 @@ function CheckoutPageContent() {
     }
   };
 
-  if (!giftCardData.recipientName && !giftCardData.senderName) { // Basic check if data is loaded
+  if (!giftCardData.recipientName && !giftCardData.senderName) { 
     return <div className="text-center py-10">Loading your gift card details...</div>;
   }
+
+  const selectedDesign = designTemplates.find(d => d.id === giftCardData.designId) || 
+                         (designTemplates.length > 0 ? designTemplates[0] : undefined);
+
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -118,7 +151,7 @@ function CheckoutPageContent() {
             <CardTitle className="font-heading text-2xl">Order Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <CheckoutSummary data={giftCardData} />
+            <CheckoutSummary data={giftCardData} selectedDesign={selectedDesign} />
           </CardContent>
         </Card>
 
@@ -144,7 +177,7 @@ function CheckoutPageContent() {
             </div>
             <Button 
               type="submit" 
-              form="payment-form" // Associates button with PaymentForm's form element
+              form="payment-form" 
               className="w-full bg-accent text-accent-foreground hover:bg-accent/90" 
               disabled={!termsAccepted || isLoading}
             >

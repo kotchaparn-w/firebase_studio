@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { GiftCardData } from '@/lib/types';
-import { Button } from '@/components/ui/button';
+import type { GiftCardData, DesignTemplate } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import Image from 'next/image';
 
 const formSchema = z.object({
   recipientName: z.string().min(2, { message: "Recipient's name must be at least 2 characters." }),
@@ -19,6 +19,7 @@ const formSchema = z.object({
   message: z.string().max(200, { message: "Message cannot exceed 200 characters." }).optional(),
   amount: z.number().min(10, { message: "Amount must be at least $10." }).max(500, { message: "Amount cannot exceed $500." }),
   occasion: z.string().min(1, { message: "Please select an occasion." }),
+  designId: z.string().min(1, { message: "Please select a design." }),
   deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }).optional().or(z.literal('')),
   noteToStaff: z.string().max(150, { message: "Note to staff cannot exceed 150 characters." }).optional(),
 });
@@ -27,13 +28,14 @@ type GiftCardFormValues = z.infer<typeof formSchema>;
 
 interface GiftCardFormProps {
   initialData: GiftCardData;
+  designTemplates: DesignTemplate[];
   onFormChange: (data: Partial<GiftCardData>) => void;
   onSubmit: (data: GiftCardData) => void;
 }
 
-const occasions = ["Birthday", "Anniversary", "Thank You", "Congratulations", "Holiday", "Just Because"];
+const occasions = ["Birthday", "Anniversary", "Thank You", "Congratulations", "Holiday", "Just Because", "Unbirthday"];
 
-export default function GiftCardForm({ initialData, onFormChange, onSubmit: handleFormSubmit }: GiftCardFormProps) {
+export default function GiftCardForm({ initialData, designTemplates, onFormChange, onSubmit: handleFormSubmit }: GiftCardFormProps) {
   const form = useForm<GiftCardFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,6 +44,7 @@ export default function GiftCardForm({ initialData, onFormChange, onSubmit: hand
       message: initialData.message || '',
       amount: initialData.amount || 50,
       occasion: initialData.occasion || 'Birthday',
+      designId: initialData.designId || (designTemplates.length > 0 ? designTemplates[0].id : ''),
       deliveryEmail: initialData.deliveryEmail || '',
       noteToStaff: initialData.noteToStaff || '',
     },
@@ -53,6 +56,13 @@ export default function GiftCardForm({ initialData, onFormChange, onSubmit: hand
     });
     return () => subscription.unsubscribe();
   }, [form, onFormChange]);
+
+  useEffect(() => {
+    if (!form.getValues('designId') && designTemplates.length > 0) {
+      form.setValue('designId', designTemplates[0].id);
+    }
+  }, [designTemplates, form]);
+
 
   const processSubmit = (values: GiftCardFormValues) => {
     handleFormSubmit({ ...initialData, ...values });
@@ -136,6 +146,45 @@ export default function GiftCardForm({ initialData, onFormChange, onSubmit: hand
 
         <FormField
           control={form.control}
+          name="designId"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>Choose a Design</FormLabel>
+              {designTemplates.length > 0 ? (
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="grid grid-cols-2 gap-4 sm:grid-cols-3"
+                  >
+                    {designTemplates.map((template) => (
+                      <FormItem key={template.id} className="flex items-center space-x-0">
+                         <FormControl>
+                          <RadioGroupItem value={template.id} id={`design-${template.id}`} className="sr-only" />
+                         </FormControl>
+                        <FormLabel htmlFor={`design-${template.id}`} className="w-full">
+                          <div className={`cursor-pointer rounded-lg border-2 ${field.value === template.id ? 'border-primary ring-2 ring-primary ring-offset-2' : 'border-border'} overflow-hidden shadow-sm hover:shadow-md transition-all`}>
+                            <div className="relative aspect-[1.618] w-full bg-muted">
+                              <Image src={template.imageUrl} alt={template.name} layout="fill" objectFit="cover" data-ai-hint={template.dataAiHint || 'card design'} />
+                            </div>
+                            <p className="text-xs font-medium p-2 text-center bg-background/80 truncate">{template.name}</p>
+                          </div>
+                        </FormLabel>
+                      </FormItem>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+              ) : (
+                <FormDescription>No designs available at the moment. A default design will be used.</FormDescription>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
+        <FormField
+          control={form.control}
           name="message"
           render={({ field }) => (
             <FormItem>
@@ -172,15 +221,12 @@ export default function GiftCardForm({ initialData, onFormChange, onSubmit: hand
               <FormControl>
                 <Textarea placeholder="e.g., Please ensure a quiet room." {...field} rows={2} />
               </FormControl>
-              <FormDescription>Special requests or preferences for the recipient's visit.</FormDescription>
+              <FormDescription>Special requests or preferences for the recipient's visit. This note is for staff only and will not appear on the gift card itself.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        {/* The main submit button is on the parent page (src/app/page.tsx) */}
-        {/* This form's onSubmit is triggered by that button if structure allows, or we pass a ref */}
-        {/* For simplicity, assuming parent button triggers this form's logic if type="submit" and part of form or handled via React Hook Form's submit handler */}
       </form>
     </Form>
   );

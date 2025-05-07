@@ -1,12 +1,13 @@
 'use client';
 
-import type { GiftCardData } from '@/lib/types';
+import type { GiftCardData, DesignTemplate } from '@/lib/types';
 
 interface CheckoutSummaryProps {
   data: GiftCardData;
+  selectedDesign?: DesignTemplate;
 }
 
-export default function CheckoutSummary({ data }: CheckoutSummaryProps) {
+export default function CheckoutSummary({ data, selectedDesign }: CheckoutSummaryProps) {
   return (
     <div className="space-y-4 p-1">
       <h3 className="font-heading text-xl font-semibold text-foreground">Gift Card Details</h3>
@@ -24,6 +25,12 @@ export default function CheckoutSummary({ data }: CheckoutSummaryProps) {
           <span>Occasion:</span>
           <span className="font-medium text-foreground">{data.occasion}</span>
         </div>
+        {selectedDesign && (
+          <div className="flex justify-between">
+            <span>Design:</span>
+            <span className="font-medium text-foreground">{selectedDesign.name}</span>
+          </div>
+        )}
         {data.message && (
           <div>
             <p>Message:</p>
@@ -40,7 +47,7 @@ export default function CheckoutSummary({ data }: CheckoutSummaryProps) {
         )}
          {data.noteToStaff && (
           <div>
-            <p>Note to Staff:</p>
+            <p>Note to Staff (Internal):</p>
             <blockquote className="mt-1 border-l-2 pl-3 italic text-foreground">
               "{data.noteToStaff}"
             </blockquote>
