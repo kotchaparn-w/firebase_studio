@@ -19,7 +19,7 @@ import { useToast } from '@/hooks/use-toast'; // Import useToast
 const formSchema = z.object({
   recipientName: z.string().min(2, { message: "Recipient's name must be at least 2 characters." }),
   senderName: z.string().min(2, { message: "Sender's name must be at least 2 characters." }),
-  message: z.string().max(200, { message: "Message cannot exceed 200 characters." }).optional(),
+  message: z.string().max(90, { message: "Message cannot exceed 90 characters." }).optional(), // Updated max length
   amount: z.number().min(10, { message: "Amount must be at least $10." }).max(500, { message: "Amount cannot exceed $500." }),
   occasion: z.string().min(1, { message: "Please select an occasion." }),
   designId: z.string().min(1, { message: "Please select a design." }),
