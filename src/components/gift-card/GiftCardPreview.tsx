@@ -20,13 +20,13 @@ const getOccasionIcon = (occasion: string) => {
 
 export default function GiftCardPreview({ data, designTemplates }: GiftCardPreviewProps) {
   const [cardNumber, setCardNumber] = useState('');
-  
+
   useEffect(() => {
     setCardNumber(data.cardNumber || generateGiftCardNumber(data));
   }, [data.recipientName, data.amount, data.occasion, data.cardNumber]);
 
-  const selectedDesign = designTemplates.find(dt => dt.id === data.designId) || 
-                         (designTemplates.length > 0 ? designTemplates[0] : null) || 
+  const selectedDesign = designTemplates.find(dt => dt.id === data.designId) ||
+                         (designTemplates.length > 0 ? designTemplates[0] : null) ||
                          { id:'fallback', name: 'Default Design', imageUrl: 'https://picsum.photos/seed/spaRelax/600/370', dataAiHint: 'spa serene' };
 
 
@@ -43,25 +43,27 @@ export default function GiftCardPreview({ data, designTemplates }: GiftCardPrevi
           key={selectedDesign.id} // Ensures image re-renders if src changes
         />
         <div className="absolute inset-0 p-6 flex flex-col justify-between bg-black/10">
+          {/* Top section */}
           <div>
             <div className="flex justify-between items-start">
-              <h2 className="font-heading text-2xl font-bold text-primary-foreground drop-shadow-sm">
-                The Luxurious Spa
-              </h2>
-              <div className="font-heading text-3xl font-bold text-primary-foreground drop-shadow-md">
+              {/* Amount - Moved to top right */}
+              <div className="font-heading text-3xl font-bold text-primary-foreground drop-shadow-md ml-auto">
                 ${data.amount}
               </div>
             </div>
-            <p className="text-sm text-primary-foreground/80 mt-1">{data.occasion}</p>
+             {/* Occasion - Placed below amount */}
+            <p className="text-sm text-primary-foreground/80 mt-1 text-right">{data.occasion}</p>
           </div>
 
-          <div className="text-center my-4">
+          {/* Middle section */}
+          <div className="text-center my-auto"> {/* Centered vertically */}
             <p className="text-lg text-primary-foreground/90">A Special Gift For</p>
             <p className="font-heading text-2xl font-semibold text-primary-foreground capitalize truncate drop-shadow-sm">
               {data.recipientName || "Recipient's Name"}
             </p>
           </div>
-          
+
+          {/* Lower-middle section */}
           <div className="text-center">
             {data.message && (
               <p className="text-sm italic text-primary-foreground/80 mb-2 truncate max-w-xs mx-auto">
@@ -71,15 +73,32 @@ export default function GiftCardPreview({ data, designTemplates }: GiftCardPrevi
             <p className="text-sm text-primary-foreground/90">From: {data.senderName || "Sender's Name"}</p>
           </div>
 
+          {/* Bottom-right icon */}
           <div className="flex justify-end items-center mt-auto pt-4">
              {getOccasionIcon(data.occasion)}
           </div>
         </div>
       </div>
-      <CardContent className="p-4 bg-card/80">
-        <div className="text-xs text-muted-foreground">
-          <p>Redeemable at The Luxurious Spa for services and products.</p>
-          <p>Card Number: {cardNumber}</p>
+       {/* Bottom Bar */}
+      <CardContent className="p-3 bg-card/80">
+        <div className="flex items-center space-x-3"> {/* Flex container */}
+          {/* Logo Placeholder */}
+          <div className="shrink-0"> {/* Prevent shrinking */}
+              <Image
+                  src="https://picsum.photos/seed/spaLogo/60/40" // Placeholder logo URL
+                  alt="Spa Logo Placeholder"
+                  width={60}
+                  height={40}
+                  objectFit="contain" // Adjust as needed
+                  className="rounded-sm bg-muted" // Added bg for visibility
+                  data-ai-hint="spa logo"
+              />
+          </div>
+          {/* Text Content */}
+          <div className="flex-1 text-xs text-muted-foreground space-y-0.5"> {/* Takes remaining space */}
+            <p>Redeemable for services and products.</p>
+            <p>Card Number: {cardNumber}</p>
+          </div>
         </div>
       </CardContent>
     </Card>
