@@ -51,6 +51,16 @@ export default function HomePage() {
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+        <Card className="sticky top-24 shadow-xl">
+           <CardHeader>
+            <CardTitle className="font-heading text-3xl">Live Preview</CardTitle>
+            <CardDescription>See your gift card design update in real-time.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GiftCardPreview data={giftCardData} />
+          </CardContent>
+        </Card>
+
         <Card className="shadow-xl">
           <CardHeader>
             <CardTitle className="font-heading text-3xl">Customize Your Gift Card</CardTitle>
@@ -62,16 +72,6 @@ export default function HomePage() {
               onFormChange={handleFormChange} 
               onSubmit={handleProceedToCheckout}
             />
-          </CardContent>
-        </Card>
-
-        <Card className="sticky top-24 shadow-xl">
-           <CardHeader>
-            <CardTitle className="font-heading text-3xl">Live Preview</CardTitle>
-            <CardDescription>See your gift card design update in real-time.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <GiftCardPreview data={giftCardData} />
           </CardContent>
         </Card>
       </div>
@@ -86,3 +86,4 @@ export default function HomePage() {
     </div>
   );
 }
+
