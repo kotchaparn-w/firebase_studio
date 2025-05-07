@@ -35,6 +35,7 @@ interface GiftCardFormProps {
 }
 
 const occasions = ["Birthday", "Anniversary", "Thank You", "Congratulations", "Holiday", "Just Because", "Unbirthday"];
+const MAX_MESSAGE_LENGTH = 90;
 
 // Use the passed form instance directly
 export default function GiftCardForm({ form, designTemplates, onFormChange }: GiftCardFormProps) {
@@ -53,6 +54,10 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
       form.setValue('designId', designTemplates[0].id, { shouldValidate: false }); // Avoid redundant validation
     }
   }, [designTemplates, form]);
+
+  const messageValue = form.watch('message');
+  const remainingChars = MAX_MESSAGE_LENGTH - (messageValue?.length || 0);
+
 
   return (
     // Use the passed form instance here
@@ -180,9 +185,9 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
             <FormItem>
               <FormLabel>Personalized Message (Optional)</FormLabel>
               <FormControl>
-                <Textarea placeholder="e.g., Wishing you a relaxing day!" {...field} rows={3} maxLength={90} />
+                <Textarea placeholder="e.g., Wishing you a relaxing day!" {...field} rows={3} maxLength={MAX_MESSAGE_LENGTH} />
               </FormControl>
-               <FormDescription>Maximum 90 characters.</FormDescription>
+               <FormDescription>Maximum {MAX_MESSAGE_LENGTH} characters. {remainingChars} remaining.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -222,3 +227,4 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
     </Form>
   );
 }
+
