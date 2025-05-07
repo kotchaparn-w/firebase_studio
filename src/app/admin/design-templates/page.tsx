@@ -26,7 +26,8 @@ const templateFormSchema = z.object({
 
 type TemplateFormValues = z.infer<typeof templateFormSchema>;
 
-const occasionsForFeatured = ["Birthday", "Anniversary", "Thank You", "Congratulations", "Holiday", "Just Because", "Unbirthday", "Other", ""];
+// Removed the empty string "" from the end of this array
+const occasionsForFeatured = ["Birthday", "Anniversary", "Thank You", "Congratulations", "Holiday", "Just Because", "Unbirthday", "Other"];
 
 
 export default function DesignTemplatesPage() {
@@ -81,7 +82,7 @@ export default function DesignTemplatesPage() {
       toast({ title: "Template Deleted", description: "The design template has been removed.", variant: "destructive" });
     }
   };
-  
+
   const justBecauseTemplates = templates.filter(
     t => t.featuredOccasion === 'Just Because' || !t.featuredOccasion || t.featuredOccasion === 'Other'
   );
@@ -164,15 +165,19 @@ export default function DesignTemplatesPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Featured Occasion (Optional)</FormLabel>
+                            {/* Use field.value which can be undefined/null/empty string */}
                             <Select onValueChange={field.onChange} value={field.value || ''}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select a featured occasion" />
+                                  <SelectValue placeholder="Select a featured occasion (or None)" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
+                                 {/* Add an explicit "None" option */}
+                                <SelectItem value="">None</SelectItem>
                                 {occasionsForFeatured.map(occ => (
-                                  <SelectItem key={occ || 'none'} value={occ}>{occ || 'None'}</SelectItem>
+                                  // Use occ as value, which is guaranteed not to be empty now
+                                  <SelectItem key={occ} value={occ}>{occ}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -198,13 +203,13 @@ export default function DesignTemplatesPage() {
               {templates.map(template => (
                 <Card key={template.id} className="overflow-hidden group relative flex flex-col">
                   <div className="relative aspect-[1.618] bg-muted">
-                     <Image 
-                      src={template.imageUrl} 
-                      alt={template.name} 
-                      layout="fill" 
+                     <Image
+                      src={template.imageUrl}
+                      alt={template.name}
+                      layout="fill"
                       objectFit="cover"
                       className="transition-transform duration-300 group-hover:scale-105"
-                      data-ai-hint={template.dataAiHint || "card design"} 
+                      data-ai-hint={template.dataAiHint || "card design"}
                       />
                   </div>
                   <CardContent className="p-4 flex-grow flex flex-col justify-between">
@@ -242,7 +247,7 @@ export default function DesignTemplatesPage() {
         <CardContent>
             {justBecauseTemplates.length > 0 ? (
                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {justBecauseTemplates.slice(0,3).map(template => ( 
+                    {justBecauseTemplates.slice(0,3).map(template => (
                         <Card key={`jb-${template.id}`} className="overflow-hidden group">
                              <div className="relative aspect-[1.618] bg-muted">
                                 <Image src={template.imageUrl} alt={template.name} layout="fill" objectFit="cover" data-ai-hint={template.dataAiHint || "card design"}/>
