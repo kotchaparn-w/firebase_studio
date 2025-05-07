@@ -51,7 +51,7 @@ export default function HomePage() {
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-        <Card className="sticky top-24 shadow-xl">
+        <Card className="lg:sticky top-24 shadow-xl">
            <CardHeader>
             <CardTitle className="font-heading text-3xl">Live Preview</CardTitle>
             <CardDescription>See your gift card design update in real-time.</CardDescription>
