@@ -5,37 +5,93 @@ import GiftCardForm from '@/components/gift-card/GiftCardForm';
 import GiftCardPreview from '@/components/gift-card/GiftCardPreview';
 import type { GiftCardData, DesignTemplate } from '@/lib/types';
 import { initialGiftCardData } from '@/lib/types';
-import { initialDesignTemplates } from '@/lib/mockData'; 
+import { initialDesignTemplates } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
-import { useIsMobile } from '@/hooks/use-mobile'; 
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useToast } from '@/hooks/use-toast'; // Import useToast
+
+// Define the form schema here, consistent with GiftCardForm
+const formSchema = z.object({
+  recipientName: z.string().min(2, { message: "Recipient's name must be at least 2 characters." }),
+  senderName: z.string().min(2, { message: "Sender's name must be at least 2 characters." }),
+  message: z.string().max(200, { message: "Message cannot exceed 200 characters." }).optional(),
+  amount: z.number().min(10, { message: "Amount must be at least $10." }).max(500, { message: "Amount cannot exceed $500." }),
+  occasion: z.string().min(1, { message: "Please select an occasion." }),
+  designId: z.string().min(1, { message: "Please select a design." }),
+  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }).optional().or(z.literal('')),
+  noteToStaff: z.string().max(150, { message: "Note to staff cannot exceed 150 characters." }).optional(),
+});
+
+type GiftCardFormValues = z.infer<typeof formSchema>;
+
 
 export default function HomePage() {
   const [designTemplates, setDesignTemplates] = useState<DesignTemplate[]>(initialDesignTemplates);
-  const [giftCardData, setGiftCardData] = useState<GiftCardData>(() => ({
-    ...initialGiftCardData,
-    designId: initialDesignTemplates.length > 0 ? initialDesignTemplates[0].id : '', 
-  }));
+  // Initialize form state using useForm here
+  const form = useForm<GiftCardFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      ...initialGiftCardData,
+      designId: initialDesignTemplates.length > 0 ? initialDesignTemplates[0].id : '',
+    },
+    mode: 'onChange', // Optional: Validate on change
+  });
+  // Gift card data for preview is derived from form state
+  const [giftCardData, setGiftCardData] = useState<GiftCardData>(form.getValues());
   const router = useRouter();
   const isMobile = useIsMobile();
+  const { toast } = useToast(); // Initialize toast
 
   useEffect(() => {
-    if (designTemplates.length > 0 && !designTemplates.find(dt => dt.id === giftCardData.designId)) {
-      setGiftCardData(prev => ({ ...prev, designId: designTemplates[0].id }));
+    // Sync preview data when form values change
+    const subscription = form.watch((value) => {
+      setGiftCardData(prev => ({ ...prev, ...value }));
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+
+  useEffect(() => {
+    // Ensure a default design is selected if available
+    if (designTemplates.length > 0 && !form.getValues('designId')) {
+       form.setValue('designId', designTemplates[0].id, { shouldValidate: true });
     }
-  }, [designTemplates, giftCardData.designId]);
+  }, [designTemplates, form]);
 
 
   const handleFormChange = (data: Partial<GiftCardData>) => {
-    setGiftCardData(prev => ({ ...prev, ...data }));
+    // This function might not be strictly needed anymore if preview syncs via watch
+    // But we can keep it if GiftCardForm needs to trigger specific updates
+     setGiftCardData(prev => ({ ...prev, ...data }));
   };
 
-  const handleProceedToCheckout = () => {
-    localStorage.setItem('giftCardData', JSON.stringify(giftCardData));
-    router.push('/checkout');
+  const handleProceedToCheckout = async () => {
+    // Trigger validation
+    const isValid = await form.trigger();
+
+    if (isValid) {
+      // Validation passed, proceed
+      const currentFormData = form.getValues();
+      localStorage.setItem('giftCardData', JSON.stringify(currentFormData));
+      router.push('/checkout');
+    } else {
+      // Validation failed, show toast
+      toast({
+        title: "Validation Error",
+        description: "Please check the form for errors and fill in all required fields.",
+        variant: "destructive",
+      });
+      // Focus on the first error field (optional, requires knowing the field names)
+      // Example: const firstError = Object.keys(form.formState.errors)[0];
+      // if (firstError) document.getElementsByName(firstError)[0]?.focus();
+    }
   };
-  
+
   const AdminDesignFeatureInfo = () => (
     <Card className="mt-12 bg-secondary/50 border-dashed">
       <CardHeader>
@@ -43,7 +99,7 @@ export default function HomePage() {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-secondary-foreground">
-          The admin panel allows management of gift card design templates. 
+          The admin panel allows management of gift card design templates.
           Customers can choose from these elegant designs to further personalize their gift cards.
           Admins can also view purchased gift card records.
         </p>
@@ -69,6 +125,7 @@ export default function HomePage() {
             <CardDescription>See your gift card design update in real-time.</CardDescription>
           </CardHeader>
           <CardContent>
+             {/* Preview uses the watched giftCardData state */}
             <GiftCardPreview data={giftCardData} designTemplates={designTemplates} />
           </CardContent>
         </Card>
@@ -80,15 +137,14 @@ export default function HomePage() {
               <CardDescription>Fill in the details below to create a unique gift.</CardDescription>
             </CardHeader>
             <CardContent>
-              <GiftCardForm 
-                initialData={giftCardData}
+              <GiftCardForm
+                form={form} // Pass the form instance down
                 designTemplates={designTemplates}
-                onFormChange={handleFormChange} 
-                onSubmit={handleProceedToCheckout}
+                onFormChange={handleFormChange} // Keep if needed by form internals
               />
             </CardContent>
           </Card>
-          
+
           {giftCardData.noteToStaff && (
             <Card className="shadow-md border-accent">
               <CardHeader>
@@ -102,13 +158,13 @@ export default function HomePage() {
           )}
         </div>
       </div>
-      
+
       <div className="text-center mt-12">
         <Button size="lg" onClick={handleProceedToCheckout} className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-12 py-6">
           Proceed to Checkout
         </Button>
       </div>
-      
+
       <AdminDesignFeatureInfo />
     </div>
   );

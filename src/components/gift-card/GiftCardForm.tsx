@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormReturn } from 'react-hook-form'; // Import UseFormReturn
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { GiftCardData, DesignTemplate } from '@/lib/types';
@@ -13,6 +13,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import Image from 'next/image';
 
+// Schema remains the same
 const formSchema = z.object({
   recipientName: z.string().min(2, { message: "Recipient's name must be at least 2 characters." }),
   senderName: z.string().min(2, { message: "Sender's name must be at least 2 characters." }),
@@ -27,29 +28,21 @@ const formSchema = z.object({
 type GiftCardFormValues = z.infer<typeof formSchema>;
 
 interface GiftCardFormProps {
-  initialData: GiftCardData;
+  form: UseFormReturn<GiftCardFormValues>; // Accept form instance as prop
   designTemplates: DesignTemplate[];
   onFormChange: (data: Partial<GiftCardData>) => void;
-  onSubmit: (data: GiftCardData) => void;
+  // Removed onSubmit prop as it's handled by the parent now
 }
 
 const occasions = ["Birthday", "Anniversary", "Thank You", "Congratulations", "Holiday", "Just Because", "Unbirthday"];
 
-export default function GiftCardForm({ initialData, designTemplates, onFormChange, onSubmit: handleFormSubmit }: GiftCardFormProps) {
-  const form = useForm<GiftCardFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      recipientName: initialData.recipientName || '',
-      senderName: initialData.senderName || '',
-      message: initialData.message || '',
-      amount: initialData.amount || 50,
-      occasion: initialData.occasion || 'Birthday',
-      designId: initialData.designId || (designTemplates.length > 0 ? designTemplates[0].id : ''),
-      deliveryEmail: initialData.deliveryEmail || '',
-      noteToStaff: initialData.noteToStaff || '',
-    },
-  });
+// Use the passed form instance directly
+export default function GiftCardForm({ form, designTemplates, onFormChange }: GiftCardFormProps) {
 
+  // Remove the internal useForm hook
+  // const form = useForm<GiftCardFormValues>({ ... });
+
+  // Keep the effect to notify parent of changes if needed, but preview syncs via watch in parent
   useEffect(() => {
     const subscription = form.watch((value) => {
       onFormChange(value as Partial<GiftCardData>);
@@ -57,20 +50,23 @@ export default function GiftCardForm({ initialData, designTemplates, onFormChang
     return () => subscription.unsubscribe();
   }, [form, onFormChange]);
 
+  // Ensure default design is set if needed (though parent also handles this)
   useEffect(() => {
     if (!form.getValues('designId') && designTemplates.length > 0) {
-      form.setValue('designId', designTemplates[0].id);
+      form.setValue('designId', designTemplates[0].id, { shouldValidate: false }); // Avoid redundant validation
     }
   }, [designTemplates, form]);
 
 
-  const processSubmit = (values: GiftCardFormValues) => {
-    handleFormSubmit({ ...initialData, ...values });
-  };
+  // Remove internal submit handler, form doesn't submit itself directly
+  // const processSubmit = (values: GiftCardFormValues) => { ... };
 
   return (
+    // Use the passed form instance here
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(processSubmit)} className="space-y-8">
+      {/* The form tag is technically not needed here as there's no submit button *within* this component */}
+      {/* Using a div instead, or keep the form tag if structure requires it */}
+      <div className="space-y-8">
         <FormField
           control={form.control}
           name="recipientName"
@@ -98,7 +94,7 @@ export default function GiftCardForm({ initialData, designTemplates, onFormChang
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="amount"
@@ -107,7 +103,8 @@ export default function GiftCardForm({ initialData, designTemplates, onFormChang
               <FormLabel>Amount: ${field.value}</FormLabel>
               <FormControl>
                 <Slider
-                  defaultValue={[field.value]}
+                  // Use field.value directly for controlled component
+                  value={[field.value]}
                   min={10}
                   max={500}
                   step={5}
@@ -127,7 +124,7 @@ export default function GiftCardForm({ initialData, designTemplates, onFormChang
           render={({ field }) => (
             <FormItem>
               <FormLabel>Occasion</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} /* Use value prop */ >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select an occasion" />
@@ -154,7 +151,7 @@ export default function GiftCardForm({ initialData, designTemplates, onFormChang
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value} // Use value prop
                     className="grid grid-cols-2 gap-4 sm:grid-cols-3"
                   >
                     {designTemplates.map((template) => (
@@ -226,8 +223,8 @@ export default function GiftCardForm({ initialData, designTemplates, onFormChang
             </FormItem>
           )}
         />
-        
-      </form>
+
+      </div>
     </Form>
   );
 }
