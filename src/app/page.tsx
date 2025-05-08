@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import GiftCardForm from '@/components/gift-card/GiftCardForm';
 import GiftCardPreview from '@/components/gift-card/GiftCardPreview';
-import type { GiftCardData, DesignTemplate } from '@/lib/types';
+import type { GiftCardData, DesignTemplate, SpaPackage } from '@/lib/types';
 import { initialGiftCardData } from '@/lib/types';
-import { initialDesignTemplates } from '@/lib/mockData';
+import { initialDesignTemplates, mockSpaPackages } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
@@ -19,25 +19,57 @@ import { useToast } from '@/hooks/use-toast'; // Import useToast
 const formSchema = z.object({
   recipientName: z.string().min(2, { message: "Recipient's name must be at least 2 characters." }),
   senderName: z.string().min(2, { message: "Sender's name must be at least 2 characters." }),
-  message: z.string().max(90, { message: "Message cannot exceed 90 characters." }).optional(), // Updated max length
-  amount: z.number().min(10, { message: "Amount must be at least $10." }).max(500, { message: "Amount cannot exceed $500." }),
+  message: z.string().max(90, { message: "Message cannot exceed 90 characters." }).optional(),
+  amountType: z.enum(['custom', 'package']),
+  // Amount must always be a number, but validation depends on amountType
+  amount: z.number().positive("Amount must be positive."),
+  selectedPackageId: z.string().optional(),
+  selectedPackageName: z.string().optional(), // Store name for convenience
   occasion: z.string().min(1, { message: "Please select an occasion." }),
   designId: z.string().min(1, { message: "Please select a design." }),
-  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }), // Made mandatory
+  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }).optional().or(z.literal('')), // Now Optional for email
   noteToStaff: z.string().max(150, { message: "Note to staff cannot exceed 150 characters." }).optional(),
+}).refine(data => {
+  // If amountType is 'custom', validate the amount range and step
+  if (data.amountType === 'custom') {
+    return data.amount >= 100 && data.amount <= 800 && (data.amount % 20 === 0);
+  }
+  return true; // No specific amount validation needed if 'package'
+}, {
+  // Custom error message for the amount field when type is 'custom'
+  message: "Amount must be between $100 and $800, in increments of $20.",
+  path: ['amount'], // Apply error to the amount field
+  // Only trigger this validation refinement when amountType is 'custom'
+  params: { dependsOn: 'amountType', value: 'custom' },
+}).refine(data => {
+   // If amountType is 'package', ensure a package is selected
+   if (data.amountType === 'package') {
+     return !!data.selectedPackageId;
+   }
+   return true; // No package validation needed if 'custom'
+}, {
+  message: "Please select a spa package.",
+  path: ['selectedPackageId'], // Apply error to the package selection field
+  params: { dependsOn: 'amountType', value: 'package' },
 });
+
 
 type GiftCardFormValues = z.infer<typeof formSchema>;
 
 
 export default function HomePage() {
   const [designTemplates, setDesignTemplates] = useState<DesignTemplate[]>(initialDesignTemplates);
+  const [spaPackages, setSpaPackages] = useState<SpaPackage[]>([]); // State for packages
+  const [isLoadingPackages, setIsLoadingPackages] = useState(true); // Loading state for packages
+
+
   // Initialize form state using useForm here
   const form = useForm<GiftCardFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      ...initialGiftCardData,
+      ...initialGiftCardData, // Includes amountType: 'custom', amount: 100
       designId: initialDesignTemplates.length > 0 ? initialDesignTemplates[0].id : '',
+      deliveryEmail: '', // Ensure it starts empty
     },
     mode: 'onChange', // Validate on change/blur for immediate feedback
   });
@@ -46,6 +78,31 @@ export default function HomePage() {
   const router = useRouter();
   const isMobile = useIsMobile();
   const { toast } = useToast(); // Initialize toast
+
+  // Fetch Spa Packages (using mock for now)
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setIsLoadingPackages(true);
+      try {
+        // TODO: Replace with actual API call: const response = await fetch('/api/spa-packages');
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+        // const data = await response.json();
+        const data = mockSpaPackages; // Use mock data for now
+        setSpaPackages(data);
+      } catch (error) {
+        console.error("Failed to fetch spa packages:", error);
+        toast({
+          title: "Error Loading Packages",
+          description: "Could not load spa packages. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingPackages(false);
+      }
+    };
+    fetchPackages();
+  }, [toast]);
+
 
   useEffect(() => {
     // Sync preview data when form values change
@@ -86,10 +143,14 @@ export default function HomePage() {
         description: "Please check the form for errors and fill in all required fields.",
         variant: "destructive",
       });
-      // Focus on the first error field (optional, requires knowing the field names)
+      // Focus on the first error field
       const firstErrorField = Object.keys(form.formState.errors)[0] as keyof GiftCardFormValues | undefined;
       if (firstErrorField) {
-         form.setFocus(firstErrorField);
+         try {
+             form.setFocus(firstErrorField);
+         } catch(e) {
+             console.error("Error setting focus:", e);
+         }
       }
     }
   };
@@ -101,8 +162,8 @@ export default function HomePage() {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-secondary-foreground">
-          The admin panel allows management of gift card design templates.
-          Customers can choose from these elegant designs to further personalize their gift cards.
+          The admin panel allows management of gift card design templates and spa packages.
+          Customers can choose from these elegant designs or pre-set packages to further personalize their gift cards.
           Admins can also view purchased gift card records.
         </p>
       </CardContent>
@@ -116,7 +177,7 @@ export default function HomePage() {
           Craft the Perfect Spa Gift
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Personalize a luxurious spa gift card for someone special. Choose an amount, add a heartfelt message, select an occasion, and pick a beautiful design.
+          Personalize a luxurious spa gift card. Choose a custom amount, select a spa package, add a heartfelt message, and pick a beautiful design.
         </p>
       </section>
 
@@ -146,6 +207,8 @@ export default function HomePage() {
               <GiftCardForm
                 form={form} // Pass the form instance down
                 designTemplates={designTemplates}
+                spaPackages={spaPackages} // Pass packages
+                isLoadingPackages={isLoadingPackages} // Pass loading state
                 onFormChange={handleFormChange} // Keep if needed by form internals
               />
             </CardContent>

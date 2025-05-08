@@ -25,6 +25,18 @@ export default function CheckoutSummary({ data, selectedDesign }: CheckoutSummar
           <span>Occasion:</span>
           <span className="font-medium text-foreground">{data.occasion}</span>
         </div>
+        {/* Display Package or Custom Amount Info */}
+        {data.amountType === 'package' && data.selectedPackageName ? (
+             <div className="flex justify-between">
+                <span>Package:</span>
+                <span className="font-medium text-foreground">{data.selectedPackageName}</span>
+            </div>
+        ) : (
+            <div className="flex justify-between">
+                <span>Amount:</span>
+                <span className="font-medium text-foreground">${data.amount.toFixed(2)}</span>
+            </div>
+        )}
         {selectedDesign && (
           <div className="flex justify-between">
             <span>Design:</span>

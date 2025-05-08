@@ -1,6 +1,7 @@
 import express, { type Express, type Request, type Response } from 'express';
 import dotenv from 'dotenv';
 import { MongoClient, ServerApiVersion } from 'mongodb';
+import { mockSpaPackages } from '../lib/mockData'; // Import mock data
 
 // Load environment variables from .env file
 dotenv.config();
@@ -69,9 +70,30 @@ connectDB().then(() => {
         }
     });
 
+     // API route to fetch spa packages
+     // In a real app, this would fetch from MongoDB: db.collection('spa_packages').find().toArray()
+     app.get('/api/spa-packages', async (req: Request, res: Response) => {
+        try {
+            // Simulate fetching from DB or just return mock data for now
+            // TODO: Replace with actual MongoDB query
+            // const db = client.db("giftspa");
+            // const collection = db.collection('spa_packages');
+            // const packages = await collection.find({}).toArray();
+            // res.json(packages);
+
+             // Returning mock data for demonstration
+             res.json(mockSpaPackages);
+        } catch (error) {
+            console.error("Error fetching spa packages:", error);
+            res.status(500).json({ message: "Error fetching spa packages" });
+        }
+    });
+
+
     // Add more routes here for creating, updating, deleting gift cards, managing designs etc.
     // e.g., app.post('/api/giftcards', ...)
     // e.g., app.get('/api/admin/designs', ...)
+    // e.g., app.post('/api/admin/spa-packages', ...) // For admin to add/edit packages
 
 
     // Start the Express server

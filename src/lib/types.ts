@@ -6,12 +6,20 @@ export interface DesignTemplate {
   featuredOccasion?: string; // For "Customize Just Because" feature
 }
 
+export interface SpaPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+}
+
+
 export interface GiftCardData {
   id?: string; // Optional, will be set for purchased cards (e.g., from DB)
   recipientName: string;
   senderName: string;
   message: string;
-  amount: number;
+  amount: number; // Final amount, whether custom or from package
   occasion: string;
   designId: string; // ID of the chosen DesignTemplate
   deliveryEmail?: string;
@@ -20,15 +28,23 @@ export interface GiftCardData {
   purchaseDate?: string; // For purchased cards
   status?: 'active' | 'redeemed' | 'expired'; // For purchased cards
   paymentMethodLast4?: string; // For purchased cards display
+
+  // New fields for amount type and package selection
+  amountType: 'custom' | 'package';
+  selectedPackageId?: string; // ID of the chosen SpaPackage
+  selectedPackageName?: string; // Name of the chosen SpaPackage (for display/summary)
 }
 
 export const initialGiftCardData: GiftCardData = {
   recipientName: '',
   senderName: '',
   message: '',
-  amount: 50,
+  amount: 100, // Start at new minimum
   occasion: 'Birthday',
   designId: 'template1', // Default to the ID of the first template in mockData
   deliveryEmail: '',
   noteToStaff: '',
+  amountType: 'custom', // Default to custom amount
+  selectedPackageId: undefined,
+  selectedPackageName: undefined,
 };

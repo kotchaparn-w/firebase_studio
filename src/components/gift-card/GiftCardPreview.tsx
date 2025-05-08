@@ -45,13 +45,23 @@ export default function GiftCardPreview({ data, designTemplates }: GiftCardPrevi
         <div className="absolute inset-0 p-6 flex flex-col justify-between bg-black/10">
           {/* Top section */}
           <div>
-            <div className="flex justify-between items-start">
-              {/* Amount - Moved to top right */}
-              <div className="font-heading text-3xl font-bold text-primary-foreground drop-shadow-md ml-auto">
-                ${data.amount}
-              </div>
+             <div className="flex justify-between items-start">
+                 {/* Display Package Name or Amount */}
+                <div className="font-heading text-2xl md:text-3xl font-bold text-primary-foreground drop-shadow-md text-right ml-auto break-words">
+                {data.amountType === 'package' && data.selectedPackageName ? (
+                    // Display package name if selected
+                    <span className="block text-xl md:text-2xl">{data.selectedPackageName}</span>
+                ) : (
+                     // Display amount if custom or package name not available
+                    <span>${data.amount}</span>
+                )}
+                 {/* Always show amount below if package */}
+                 {data.amountType === 'package' && data.selectedPackageName && (
+                    <span className="block text-base font-medium opacity-90">(${data.amount})</span>
+                 )}
+                </div>
             </div>
-             {/* Occasion - Placed below amount */}
+             {/* Occasion - Placed below amount/package */}
             <p className="text-sm text-primary-foreground/80 mt-1 text-right">{data.occasion}</p>
           </div>
 
