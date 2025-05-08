@@ -15,95 +15,108 @@ body {
 
 @layer base {
   :root {
-    --background: 252 43% 89%; /* Updated: Pastel Purple #dcd8ec */
-    --foreground: 260 30% 25%; /* Dark, slightly desaturated purple */
+    /* Adjusted background to be lighter */
+    --background: 255 50% 96%; /* Lighter Pastel Purple */
+    /* Adjusted foreground to grey */
+    --foreground: 240 5% 35%; /* Dark Grey */
 
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 260 30% 25%;
+    /* Slightly off-white card background for subtle difference */
+    --card: 255 30% 99%;
+    /* Ensure card foreground contrasts with card background */
+    --card-foreground: 240 5% 30%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 260 30% 25%;
+    --popover-foreground: 240 5% 30%;
 
-    --primary: 265 60% 70%; /* Soft Lavender/Purple */
-    --primary-foreground: 260 30% 15%; /* Darker purple for contrast on primary */
+    /* Adjusted primary to greyish-purple */
+    --primary: 260 30% 65%; /* Greyish Purple */
+    /* Ensure primary foreground contrasts with primary */
+    --primary-foreground: 260 30% 10%; /* Very Dark Grey/Purple */
 
-    --secondary: 260 60% 92%; /* Lighter pastel purple */
+    --secondary: 260 40% 94%; /* Lighter greyish purple */
     --secondary-foreground: 260 30% 25%;
 
-    --muted: 260 50% 95%; /* Very light, for subtle backgrounds */
-    --muted-foreground: 260 30% 50%;
+    --muted: 260 40% 97%; /* Very light grey/purple */
+    --muted-foreground: 240 5% 50%; /* Lighter Grey */
 
-    --accent: 45 60% 70%; /* Muted Gold */
-    --accent-foreground: 260 30% 15%; /* Darker purple for contrast on accent */
+    /* Adjusted accent for harmony */
+    --accent: 45 50% 75%; /* Softened Muted Gold */
+    --accent-foreground: 45 90% 20%; /* Darker Brown/Gold for contrast */
 
     --destructive: 0 70% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 260 30% 88%;
-    --input: 260 30% 94%;
-    --ring: 265 60% 60%; /* A slightly darker shade of primary for focus rings */
+    --border: 260 20% 90%; /* Adjusted border */
+    --input: 260 20% 95%; /* Adjusted input */
+    --ring: 260 30% 55%; /* Adjusted ring - slightly darker greyish purple */
 
     --radius: 0.5rem;
 
-    --chart-1: 265 60% 70%;
-    --chart-2: 280 50% 65%;
-    --chart-3: 45 60% 70%;
-    --chart-4: 250 55% 75%;
-    --chart-5: 300 50% 70%;
+    --chart-1: 260 30% 65%; /* Greyish Purple */
+    --chart-2: 280 25% 60%;
+    --chart-3: 45 50% 75%; /* Softened Muted Gold */
+    --chart-4: 250 35% 70%;
+    --chart-5: 300 30% 68%;
 
-    --sidebar-background: 260 60% 92%;
-    --sidebar-foreground: 260 30% 25%;
-    --sidebar-primary: 265 60% 65%;
+    /* Sidebar adjustments for consistency */
+    --sidebar-background: 260 40% 94%;
+    --sidebar-foreground: 240 5% 30%;
+    --sidebar-primary: 260 30% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 265 60% 80%;
+    --sidebar-accent: 260 30% 80%;
     --sidebar-accent-foreground: 260 30% 15%;
-    --sidebar-border: 260 30% 80%;
-    --sidebar-ring: 265 60% 55%;
+    --sidebar-border: 260 20% 85%;
+    --sidebar-ring: 260 30% 50%;
   }
 
   .dark {
-    --background: 252 20% 10%; /* Updated: Dark Purple */
-    --foreground: 260 70% 95%; /* Light pastel purple */
+    /* Adjusted dark background */
+    --background: 250 20% 12%; /* Dark Greyish Purple */
+     /* Adjusted dark foreground */
+    --foreground: 240 10% 95%; /* Very Light Grey */
 
-    --card: 260 30% 12%;
-    --card-foreground: 260 70% 95%;
+    --card: 250 15% 15%;
+    --card-foreground: 240 10% 95%;
 
-    --popover: 260 30% 8%;
-    --popover-foreground: 260 70% 95%;
+    --popover: 250 15% 10%;
+    --popover-foreground: 240 10% 95%;
 
-    --primary: 265 60% 60%; /* Slightly desaturated Lavender/Purple for dark mode */
-    --primary-foreground: 0 0% 100%;
+    /* Adjusted dark primary */
+    --primary: 260 40% 70%; /* Greyish Purple */
+    --primary-foreground: 260 10% 10%; /* Darker for contrast */
 
-    --secondary: 260 30% 15%; /* Darker purple */
-    --secondary-foreground: 260 70% 90%;
+    --secondary: 250 15% 20%; /* Darker grey/purple */
+    --secondary-foreground: 240 10% 90%;
 
-    --muted: 260 30% 12%;
-    --muted-foreground: 260 30% 60%;
+    --muted: 250 15% 18%;
+    --muted-foreground: 240 5% 65%; /* Lighter Grey for muted text */
 
-    --accent: 45 70% 65%; /* Muted Gold, slightly more saturated for dark mode */
-    --accent-foreground: 260 20% 10%;
+     /* Adjusted dark accent */
+    --accent: 45 60% 70%; /* Muted Gold */
+    --accent-foreground: 45 95% 15%; /* Dark Brown/Gold */
 
-    --destructive: 0 60% 50%;
+    --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 260 30% 25%;
-    --input: 260 30% 20%;
-    --ring: 265 60% 50%;
+    --border: 250 15% 25%;
+    --input: 250 15% 22%;
+    --ring: 260 40% 60%; /* Adjusted ring */
 
-    --chart-1: 265 60% 60%;
-    --chart-2: 280 50% 55%;
-    --chart-3: 45 70% 65%;
-    --chart-4: 250 55% 60%;
-    --chart-5: 300 50% 55%;
+    --chart-1: 260 40% 70%;
+    --chart-2: 280 35% 65%;
+    --chart-3: 45 60% 70%;
+    --chart-4: 250 40% 75%;
+    --chart-5: 300 35% 68%;
 
-    --sidebar-background: 260 30% 12%;
-    --sidebar-foreground: 260 70% 95%;
-    --sidebar-primary: 265 60% 55%;
+    /* Sidebar adjustments for dark mode */
+    --sidebar-background: 250 15% 15%;
+    --sidebar-foreground: 240 10% 95%;
+    --sidebar-primary: 260 40% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 265 50% 30%;
-    --sidebar-accent-foreground: 260 70% 95%;
-    --sidebar-border: 260 30% 22%;
-    --sidebar-ring: 265 60% 45%;
+    --sidebar-accent: 260 30% 30%;
+    --sidebar-accent-foreground: 240 10% 95%;
+    --sidebar-border: 250 15% 28%;
+    --sidebar-ring: 260 40% 55%;
   }
 }
 
