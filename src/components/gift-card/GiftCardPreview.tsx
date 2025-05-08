@@ -66,8 +66,8 @@ export default function GiftCardPreview({ data, designTemplates }: GiftCardPrevi
           {/* Lower-middle section */}
           <div className="text-center">
             {data.message && (
-              // Ensure line-clamp-2 is applied to break long messages
-              <p className="text-sm italic text-primary-foreground/80 mb-2 max-w-xs mx-auto line-clamp-2">
+              // Removed line-clamp-2 to allow full message display with wrapping
+              <p className="text-sm italic text-primary-foreground/80 mb-2 max-w-xs mx-auto break-words">
                 "{data.message}"
               </p>
             )}
