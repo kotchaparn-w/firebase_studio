@@ -15,7 +15,7 @@ body {
 
 @layer base {
   :root {
-    --background: 260 70% 97%; /* Very light pastel purple */
+    --background: 252 43% 89%; /* Updated: Pastel Purple #dcd8ec */
     --foreground: 260 30% 25%; /* Dark, slightly desaturated purple */
 
     --card: 0 0% 100%; /* White */
@@ -62,7 +62,7 @@ body {
   }
 
   .dark {
-    --background: 260 30% 10%; /* Very dark purple */
+    --background: 252 20% 10%; /* Updated: Dark Purple */
     --foreground: 260 70% 95%; /* Light pastel purple */
 
     --card: 260 30% 12%;
