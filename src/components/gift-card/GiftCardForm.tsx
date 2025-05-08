@@ -12,6 +12,7 @@ import { Slider } from '@/components/ui/slider';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 // Schema updated to make deliveryEmail mandatory and message length to 90 chars
 const formSchema = z.object({
@@ -36,6 +37,7 @@ interface GiftCardFormProps {
 
 const occasions = ["Birthday", "Anniversary", "Thank You", "Congratulations", "Holiday", "Just Because", "Unbirthday"];
 const MAX_MESSAGE_LENGTH = 90;
+const WARNING_THRESHOLD = 15;
 
 // Use the passed form instance directly
 export default function GiftCardForm({ form, designTemplates, onFormChange }: GiftCardFormProps) {
@@ -55,8 +57,10 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
     }
   }, [designTemplates, form]);
 
-  const messageValue = form.watch('message');
-  const remainingChars = MAX_MESSAGE_LENGTH - (messageValue?.length || 0);
+  const messageValue = form.watch('message') || ''; // Ensure it's a string
+  const messageLength = messageValue.length;
+  const remainingChars = MAX_MESSAGE_LENGTH - messageLength;
+  const showRemaining = messageLength > 0;
 
 
   return (
@@ -187,7 +191,18 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
               <FormControl>
                 <Textarea placeholder="e.g., Wishing you a relaxing day!" {...field} rows={3} maxLength={MAX_MESSAGE_LENGTH} />
               </FormControl>
-               <FormDescription>Maximum {MAX_MESSAGE_LENGTH} characters. {remainingChars} remaining.</FormDescription>
+               <FormDescription>
+                 {showRemaining ? (
+                   <span className={cn(
+                       'transition-colors',
+                       remainingChars <= WARNING_THRESHOLD ? 'text-accent font-medium' : 'text-muted-foreground'
+                    )}>
+                     {remainingChars} characters remaining.
+                   </span>
+                 ) : (
+                   `Maximum ${MAX_MESSAGE_LENGTH} characters.`
+                 )}
+               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -227,4 +242,3 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
     </Form>
   );
 }
-

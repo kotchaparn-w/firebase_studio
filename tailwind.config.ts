@@ -12,6 +12,7 @@ export default {
   	extend: {
       fontFamily: {
         sans: ['var(--font-lora)', ...defaultTheme.fontFamily.sans],
+        heading: ['var(--font-cinzel-decorative)', ...defaultTheme.fontFamily.serif], // Ensure heading font is explicitly defined
       },
   		colors: {
   			background: 'hsl(var(--background))',
@@ -37,8 +38,8 @@ export default {
   				foreground: 'hsl(var(--muted-foreground))'
   			},
   			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
+  				DEFAULT: 'hsl(var(--accent))', // Muted Gold
+  				foreground: 'hsl(var(--accent-foreground))' // Darker purple for contrast
   			},
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',
