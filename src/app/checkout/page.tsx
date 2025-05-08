@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
@@ -29,19 +30,32 @@ function CheckoutPageContent() {
     const storedData = localStorage.getItem('giftCardData');
     if (storedData) {
       try {
-        const parsedData: GiftCardData = JSON.parse(storedData);
-        if (!parsedData.designId && designTemplates.length > 0) {
-            parsedData.designId = designTemplates[0].id;
-        } else if (!parsedData.designId && designTemplates.length === 0) {
-            // Fallback if no templates, though designTemplates is static here.
-            parsedData.designId = 'template1'; // Default to a known ID or handle error
+        const parsedData: Partial<GiftCardData> = JSON.parse(storedData); // Parse as partial first
+
+        // Merge with defaults to ensure all fields are present
+        const mergedData: GiftCardData = {
+          ...initialGiftCardData,
+          ...parsedData,
+        };
+
+        // Ensure designId has a fallback
+        if (!mergedData.designId && designTemplates.length > 0) {
+            mergedData.designId = designTemplates[0].id;
+        } else if (!mergedData.designId && designTemplates.length === 0) {
+            mergedData.designId = 'template1'; // Default fallback
         }
-        setGiftCardData(parsedData);
+        // Basic validation: Ensure essential fields exist after merge
+        if (!mergedData.recipientName || !mergedData.senderName || !mergedData.deliveryEmail) {
+           console.warn("Loaded incomplete gift card data, redirecting.");
+           throw new Error("Incomplete gift card data.");
+        }
+
+        setGiftCardData(mergedData);
       } catch (error) {
-        console.error("Failed to parse gift card data from localStorage", error);
+        console.error("Failed to parse or validate gift card data from localStorage", error);
         toast({
           title: "Error",
-          description: "Could not load your gift card details. Please try again.",
+          description: "Could not load your gift card details. Please ensure all required fields were filled.",
           variant: "destructive",
         });
         router.push('/');
@@ -59,6 +73,18 @@ function CheckoutPageContent() {
 
   const handlePaymentSuccess = async (paymentMethodId: string) => {
     setIsLoading(true);
+
+    // Ensure email is present before proceeding (should be caught by form validation, but double-check)
+     if (!giftCardData.deliveryEmail) {
+        toast({
+            title: "Missing Information",
+            description: "Recipient email is required.",
+            variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+     }
+
 
     const finalGiftCardData: GiftCardData = {
         ...giftCardData,
@@ -110,20 +136,21 @@ function CheckoutPageContent() {
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
 
-        if (finalGiftCardData.deliveryEmail) {
-          await sendEmail(
-            finalGiftCardData.deliveryEmail,
-            `Your Gift Card from ${finalGiftCardData.senderName}`,
-            `Dear ${finalGiftCardData.recipientName},\n\nYou have received a gift card for The Luxurious Spa for $${finalGiftCardData.amount}.\n\nMessage: ${finalGiftCardData.message}\n\nOccasion: ${finalGiftCardData.occasion}\nCard Number: ${finalGiftCardData.cardNumber}\n\nEnjoy your luxurious experience!\n\nFrom, ${finalGiftCardData.senderName}`
-          );
-        }
+        // Always send email now
+        await sendEmail(
+          finalGiftCardData.deliveryEmail,
+          `Your Gift Card from ${finalGiftCardData.senderName}`,
+          `Dear ${finalGiftCardData.recipientName},\n\nYou have received a gift card for The Luxurious Spa for $${finalGiftCardData.amount}.\n\nMessage: ${finalGiftCardData.message}\n\nOccasion: ${finalGiftCardData.occasion}\nCard Number: ${finalGiftCardData.cardNumber}\n\nEnjoy your luxurious experience!\n\nFrom, ${finalGiftCardData.senderName}`
+        );
+
 
         localStorage.removeItem('giftCardData');
-        router.push(`/order-confirmation?pdfUrl=${encodeURIComponent(pdfUrl)}&emailSent=${!!finalGiftCardData.deliveryEmail}`);
+         // Pass emailSent=true since it's now mandatory
+        router.push(`/order-confirmation?pdfUrl=${encodeURIComponent(pdfUrl)}&emailSent=true`);
 
         toast({
           title: "Payment Successful!",
-          description: "Your gift card has been processed.",
+          description: "Your gift card has been processed and emailed.",
         });
 
       } else {

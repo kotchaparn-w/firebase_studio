@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -28,7 +29,8 @@ const formSchema = z.object({
   selectedPackageName: z.string().optional(), // Store name for convenience
   occasion: z.string().min(1, { message: "Please select an occasion." }),
   designId: z.string().min(1, { message: "Please select a design." }),
-  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }).optional().or(z.literal('')), // Now Optional for email
+  // Email is now required
+  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }),
   noteToStaff: z.string().max(150, { message: "Note to staff cannot exceed 150 characters." }).optional(),
 }).refine(data => {
   // If amountType is 'custom', validate the amount range and step
@@ -70,9 +72,9 @@ export default function HomePage() {
     defaultValues: {
       ...initialGiftCardData, // Includes amountType: 'custom', amount: 100
       designId: initialDesignTemplates.length > 0 ? initialDesignTemplates[0].id : '',
-      deliveryEmail: '', // Ensure it starts empty
+      deliveryEmail: '', // Ensure it starts empty, but validation will catch it
     },
-    mode: 'onChange', // Validate on change/blur for immediate feedback
+    mode: 'onBlur', // Validate on blur for fields like email
   });
   // Gift card data for preview is derived from form state
   const [giftCardData, setGiftCardData] = useState<GiftCardData>(form.getValues());
@@ -108,7 +110,8 @@ export default function HomePage() {
   useEffect(() => {
     // Sync preview data when form values change
     const subscription = form.watch((value) => {
-      setGiftCardData(prev => ({ ...prev, ...value }));
+      // Need to cast value because watch might return incomplete data structure initially
+      setGiftCardData(prev => ({ ...prev, ...(value as Partial<GiftCardData>) }));
     });
     return () => subscription.unsubscribe();
   }, [form]);
@@ -183,10 +186,10 @@ export default function HomePage() {
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-        {/* Preview uses the watched giftCardData state */}
         {/* Order changed for mobile: preview is below form */}
-        <div className={`shadow-xl order-2 lg:order-1 ${!isMobile ? 'lg:sticky top-24' : ''}`}>
-          <Card >
+        {/* Removed sticky class for preview */}
+        <div className="shadow-xl order-2 lg:order-1">
+          <Card>
              <CardHeader>
               <CardTitle className="font-heading font-bold text-3xl">Live Preview</CardTitle>
               <CardDescription>See your gift card design update in real-time.</CardDescription>
@@ -240,5 +243,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    

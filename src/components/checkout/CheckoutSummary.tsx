@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { GiftCardData, DesignTemplate } from '@/lib/types';
@@ -43,6 +44,11 @@ export default function CheckoutSummary({ data, selectedDesign }: CheckoutSummar
             <span className="font-medium text-foreground">{selectedDesign.name}</span>
           </div>
         )}
+        {/* Email is mandatory now */}
+        <div className="flex justify-between">
+          <span>Delivery Email:</span>
+          <span className="font-medium text-foreground">{data.deliveryEmail}</span>
+        </div>
         {data.message && (
           <div>
             <p>Message:</p>
@@ -51,12 +57,7 @@ export default function CheckoutSummary({ data, selectedDesign }: CheckoutSummar
             </blockquote>
           </div>
         )}
-        {data.deliveryEmail && (
-           <div className="flex justify-between">
-            <span>Delivery Email:</span>
-            <span className="font-medium text-foreground">{data.deliveryEmail}</span>
-          </div>
-        )}
+
          {data.noteToStaff && (
           <div>
             <p>Note to Staff (Internal):</p>

@@ -1,3 +1,4 @@
+
 export interface DesignTemplate {
   id: string;
   name: string;
@@ -22,7 +23,7 @@ export interface GiftCardData {
   amount: number; // Final amount, whether custom or from package
   occasion: string;
   designId: string; // ID of the chosen DesignTemplate
-  deliveryEmail?: string;
+  deliveryEmail: string; // Made mandatory for e-delivery logic
   noteToStaff?: string;
   cardNumber?: string; // Auto-generated and displayed
   purchaseDate?: string; // For purchased cards
@@ -42,7 +43,7 @@ export const initialGiftCardData: GiftCardData = {
   amount: 100, // Start at new minimum
   occasion: 'Birthday',
   designId: 'template1', // Default to the ID of the first template in mockData
-  deliveryEmail: '',
+  deliveryEmail: '', // Start empty, but validation will enforce it
   noteToStaff: '',
   amountType: 'custom', // Default to custom amount
   selectedPackageId: undefined,
