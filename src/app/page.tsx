@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -171,7 +172,7 @@ export default function HomePage() {
   );
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 py-12"> {/* Added py-12 for vertical padding */}
       <section className="text-center">
         <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-primary mb-4">
           Craft the Perfect Spa Gift
@@ -203,7 +204,8 @@ export default function HomePage() {
               <CardTitle className="font-heading font-bold text-3xl">Customize Your Gift Card</CardTitle>
               <CardDescription>Fill in the details below to create a unique gift.</CardDescription>
             </CardHeader>
-            <CardContent>
+            {/* Added pb-6 to CardContent for more space at the bottom */}
+            <CardContent className="pb-6">
               <GiftCardForm
                 form={form} // Pass the form instance down
                 designTemplates={designTemplates}
@@ -238,3 +240,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    

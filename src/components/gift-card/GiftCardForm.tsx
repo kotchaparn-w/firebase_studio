@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect } from 'react';
@@ -80,7 +81,7 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
         form.setValue('selectedPackageId', undefined);
         form.setValue('selectedPackageName', undefined);
         // Optional: reset amount to default custom value if needed
-        // form.setValue('amount', 100, { shouldValidate: true });
+        form.setValue('amount', 100, { shouldValidate: true });
       }
       // If amountType changes to 'package', clear custom amount validation errors, reset package selection?
        if (name === 'amountType' && value.amountType === 'package') {
@@ -103,7 +104,7 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
   const messageValue = form.watch('message') || ''; // Ensure it's a string
   const messageLength = messageValue.length;
   const remainingChars = MAX_MESSAGE_LENGTH - messageLength;
-  const showRemaining = messageLength > 0;
+  const showRemaining = messageLength > 0 || form.formState.isSubmitted; // Show always or after typing
 
 
   const handlePackageChange = (packageId: string) => {
@@ -127,7 +128,48 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
     // Use the passed form instance here
     <Form {...form}>
       {/* Using a div as no submit button inside */}
-      <div className="space-y-8">
+      {/* Increased overall spacing from space-y-8 to space-y-10 */}
+      <div className="space-y-10">
+
+        {/* MOVED: Select Theme Field */}
+        <FormField
+          control={form.control}
+          name="designId"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>Select Theme</FormLabel>
+              {designTemplates.length > 0 ? (
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    value={field.value} // Use value prop
+                    className="grid grid-cols-2 gap-4 sm:grid-cols-3"
+                  >
+                    {designTemplates.map((template) => (
+                      <FormItem key={template.id} className="flex items-center space-x-0">
+                         <FormControl>
+                          <RadioGroupItem value={template.id} id={`design-${template.id}`} className="sr-only" />
+                         </FormControl>
+                        <FormLabel htmlFor={`design-${template.id}`} className="w-full">
+                          <div className={cn(`cursor-pointer rounded-lg border-2 ${field.value === template.id ? 'border-primary ring-2 ring-primary ring-offset-2' : 'border-border'} overflow-hidden shadow-sm hover:shadow-md transition-all`)}>
+                            <div className="relative aspect-[1.618] w-full bg-muted">
+                              <Image src={template.imageUrl} alt={template.name} layout="fill" objectFit="cover" data-ai-hint={template.dataAiHint || 'card design'} />
+                            </div>
+                            <p className="text-xs font-medium p-2 text-center bg-background/80 truncate">{template.name}</p>
+                          </div>
+                        </FormLabel>
+                      </FormItem>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+              ) : (
+                <FormDescription>No designs available at the moment. A default design will be used.</FormDescription>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="recipientName"
@@ -304,43 +346,8 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="designId"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Select Theme</FormLabel>
-              {designTemplates.length > 0 ? (
-                <FormControl>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    value={field.value} // Use value prop
-                    className="grid grid-cols-2 gap-4 sm:grid-cols-3"
-                  >
-                    {designTemplates.map((template) => (
-                      <FormItem key={template.id} className="flex items-center space-x-0">
-                         <FormControl>
-                          <RadioGroupItem value={template.id} id={`design-${template.id}`} className="sr-only" />
-                         </FormControl>
-                        <FormLabel htmlFor={`design-${template.id}`} className="w-full">
-                          <div className={cn(`cursor-pointer rounded-lg border-2 ${field.value === template.id ? 'border-primary ring-2 ring-primary ring-offset-2' : 'border-border'} overflow-hidden shadow-sm hover:shadow-md transition-all`)}>
-                            <div className="relative aspect-[1.618] w-full bg-muted">
-                              <Image src={template.imageUrl} alt={template.name} layout="fill" objectFit="cover" data-ai-hint={template.dataAiHint || 'card design'} />
-                            </div>
-                            <p className="text-xs font-medium p-2 text-center bg-background/80 truncate">{template.name}</p>
-                          </div>
-                        </FormLabel>
-                      </FormItem>
-                    ))}
-                  </RadioGroup>
-                </FormControl>
-              ) : (
-                <FormDescription>No designs available at the moment. A default design will be used.</FormDescription>
-              )}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* MOVED TO TOP */}
+        {/* <FormField ... designId ... /> */}
 
 
         <FormField
@@ -354,14 +361,14 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
               </FormControl>
                <FormDescription className="flex justify-between items-center">
                  <span>Maximum {MAX_MESSAGE_LENGTH} characters.</span>
-                 {showRemaining && (
+                 {showRemaining ? (
                    <span className={cn(
                        'transition-colors text-xs',
                        remainingChars <= WARNING_THRESHOLD ? 'text-destructive font-medium' : 'text-muted-foreground'
                     )}>
                      {remainingChars} characters remaining
                    </span>
-                 )}
+                 ) : <span>{MAX_MESSAGE_LENGTH} characters remaining</span>}
                </FormDescription>
               <FormMessage />
             </FormItem>
@@ -402,3 +409,5 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
     </Form>
   );
 }
+
+    
