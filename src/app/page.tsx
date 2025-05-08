@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast'; // Import useToast
 const formSchema = z.object({
   recipientName: z.string().min(2, { message: "Recipient's name must be at least 2 characters." }),
   senderName: z.string().min(2, { message: "Sender's name must be at least 2 characters." }),
+  senderEmail: z.string().email({ message: "Please enter a valid sender email." }), // Added sender email
   message: z.string().max(90, { message: "Message cannot exceed 90 characters." }).optional(),
   amountType: z.enum(['custom', 'package']),
   // Amount must always be a number, but validation depends on amountType
@@ -29,8 +30,7 @@ const formSchema = z.object({
   selectedPackageName: z.string().optional(), // Store name for convenience
   occasion: z.string().min(1, { message: "Please select an occasion." }),
   designId: z.string().min(1, { message: "Please select a design." }),
-  // Email is now required
-  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }),
+  deliveryEmail: z.string().email({ message: "Please enter a valid recipient email for delivery." }), // Updated description
   noteToStaff: z.string().max(150, { message: "Note to staff cannot exceed 150 characters." }).optional(),
 }).refine(data => {
   // If amountType is 'custom', validate the amount range and step
@@ -73,6 +73,7 @@ export default function HomePage() {
       ...initialGiftCardData, // Includes amountType: 'custom', amount: 100
       designId: initialDesignTemplates.length > 0 ? initialDesignTemplates[0].id : '',
       deliveryEmail: '', // Ensure it starts empty, but validation will catch it
+      senderEmail: '', // Added sender email default
     },
     mode: 'onBlur', // Validate on blur for fields like email
   });
@@ -186,9 +187,9 @@ export default function HomePage() {
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-        {/* Order changed for mobile: preview is below form */}
-        {/* Removed sticky class for preview */}
-        <div className="shadow-xl order-2 lg:order-1">
+        {/* Order changed: preview left, form right on large screens */}
+        {/* Preview Card */}
+        <div className="shadow-xl order-1 lg:order-1">
           <Card>
              <CardHeader>
               <CardTitle className="font-heading font-bold text-3xl">Live Preview</CardTitle>
@@ -198,29 +199,8 @@ export default function HomePage() {
               <GiftCardPreview data={giftCardData} designTemplates={designTemplates} />
             </CardContent>
           </Card>
-         </div>
-
-        {/* Order changed for mobile: form is above preview */}
-        <div className="space-y-6 order-1 lg:order-2">
-          <Card className="shadow-xl">
-            <CardHeader>
-              <CardTitle className="font-heading font-bold text-3xl">Customize Your Gift Card</CardTitle>
-              <CardDescription>Fill in the details below to create a unique gift.</CardDescription>
-            </CardHeader>
-            {/* Added pb-6 to CardContent for more space at the bottom */}
-            <CardContent className="pb-6">
-              <GiftCardForm
-                form={form} // Pass the form instance down
-                designTemplates={designTemplates}
-                spaPackages={spaPackages} // Pass packages
-                isLoadingPackages={isLoadingPackages} // Pass loading state
-                onFormChange={handleFormChange} // Keep if needed by form internals
-              />
-            </CardContent>
-          </Card>
-
-          {giftCardData.noteToStaff && (
-            <Card className="shadow-md border-accent">
+           {giftCardData.noteToStaff && (
+            <Card className="mt-6 shadow-md border-accent"> {/* Moved note preview below Gift Card Preview */}
               <CardHeader>
                 <CardTitle className="font-heading font-bold text-xl text-accent">Note for Spa Staff</CardTitle>
               </CardHeader>
@@ -230,6 +210,25 @@ export default function HomePage() {
               </CardContent>
             </Card>
           )}
+         </div>
+
+        {/* Form Card */}
+        <div className="space-y-6 order-2 lg:order-2">
+          <Card className="shadow-xl">
+            <CardHeader>
+              <CardTitle className="font-heading font-bold text-3xl">Customize Your Gift Card</CardTitle>
+              <CardDescription>Fill in the details below to create a unique gift.</CardDescription>
+            </CardHeader>
+            <CardContent className="pb-6">
+              <GiftCardForm
+                form={form}
+                designTemplates={designTemplates}
+                spaPackages={spaPackages}
+                isLoadingPackages={isLoadingPackages}
+                onFormChange={handleFormChange}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
 
@@ -243,3 +242,4 @@ export default function HomePage() {
     </div>
   );
 }
+

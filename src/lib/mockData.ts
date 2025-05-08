@@ -11,6 +11,7 @@ export const initialDesignTemplates: DesignTemplate[] = [
 const samplePurchasedCardBase1: Omit<GiftCardData, 'cardNumber' | 'id' | 'purchaseDate' | 'status' | 'paymentMethodLast4' | 'amountType'> = {
   recipientName: "Alice Wonderland",
   senderName: "Mad Hatter",
+  senderEmail: "madhatter@example.com", // Added sender email
   message: "A very merry unbirthday to you!",
   amount: 100,
   occasion: "Unbirthday",
@@ -22,16 +23,19 @@ const samplePurchasedCardBase1: Omit<GiftCardData, 'cardNumber' | 'id' | 'purcha
 const samplePurchasedCardBase2: Omit<GiftCardData, 'cardNumber' | 'id' | 'purchaseDate' | 'status' | 'paymentMethodLast4' | 'amountType'> = {
   recipientName: "Bob The Builder",
   senderName: "Wendy",
+  senderEmail: "wendy@example.com", // Added sender email
   message: "Thanks for all your help!",
   amount: 50,
   occasion: "Thank You",
   designId: "template2",
   noteToStaff: "Ensure access for construction boots.",
+  deliveryEmail: "bob@example.com", // Added delivery email
 };
 
 const samplePurchasedCardBase3: Omit<GiftCardData, 'cardNumber' | 'id' | 'purchaseDate' | 'status' | 'paymentMethodLast4' | 'amountType'> = {
   recipientName: "Charlie Brown",
   senderName: "Snoopy",
+  senderEmail: "snoopy@example.com", // Added sender email
   message: "Good grief, have a good day!",
   amount: 25,
   occasion: "Just Because",

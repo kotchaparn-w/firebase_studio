@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -11,12 +12,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import GiftCardPreview from '@/components/gift-card/GiftCardPreview';
 import type { GiftCardData, DesignTemplate } from '@/lib/types';
-import { initialDesignTemplates } from '@/lib/mockData';
+import { initialDesignTemplates, mockPurchasedCards } from '@/lib/mockData'; // Use mockPurchasedCards
 import { generateGiftCardNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 const retrievalSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: z.string().email({ message: "Please enter the sender's email address used for purchase." }), // Changed label
   lastFourDigits: z.string().length(4, { message: "Please enter the last 4 digits of your card." }).regex(/^\d{4}$/, { message: "Must be 4 digits." }),
 });
 
@@ -44,10 +45,10 @@ export default function RetrieveGiftCardPage() {
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     // In a real app, this would be an API call to your backend.
-    // The backend would query MongoDB based on email and a HASH of lastFourDigits or a token.
+    // The backend would query MongoDB based on SENDER email and a HASH of lastFourDigits or a token.
     // For this mock, we check against predefined values from localStorage or initial mock.
     const storedPurchasesString = localStorage.getItem('mockPurchasedCards');
-    let allCards: GiftCardData[] = initialDesignTemplates.length > 0 ? [...mockPurchasedCards] : []; // Start with mocks if designs exist
+    let allCards: GiftCardData[] = [...mockPurchasedCards]; // Start with mocks
     if(storedPurchasesString) {
       try {
         const storedPurchases = JSON.parse(storedPurchasesString);
@@ -61,9 +62,9 @@ export default function RetrieveGiftCardPage() {
       }
     }
 
-    // Find card matching email and last four (using mock paymentMethodLast4)
+    // Find card matching SENDER email and last four (using mock paymentMethodLast4)
     const foundCard = allCards.find(card =>
-        card.deliveryEmail?.toLowerCase() === values.email.toLowerCase() &&
+        card.senderEmail?.toLowerCase() === values.email.toLowerCase() && // Check against senderEmail
         card.paymentMethodLast4 === values.lastFourDigits
     );
 
@@ -77,7 +78,7 @@ export default function RetrieveGiftCardPage() {
     } else {
       toast({
         title: "Retrieval Failed",
-        description: "No gift card found matching your details. Please check your information and try again.",
+        description: "No gift card found matching the sender's email and payment details. Please check your information and try again.",
         variant: "destructive",
       });
     }
@@ -91,7 +92,7 @@ export default function RetrieveGiftCardPage() {
         <CardHeader>
           <CardTitle className="font-heading font-bold text-3xl text-center text-primary">Retrieve Your Gift Card</CardTitle>
           <CardDescription className="text-center">
-            Enter the email address used for purchase and the last four digits of the payment card.
+            Enter the sender's email address used for purchase and the last four digits of the payment card.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -102,9 +103,9 @@ export default function RetrieveGiftCardPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Purchase Email Address</FormLabel>
+                    <FormLabel>Sender's Purchase Email Address</FormLabel> {/* Updated label */}
                     <FormControl>
-                      <Input type="email" placeholder="you@example.com" {...field} />
+                      <Input type="email" placeholder="sender@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -148,7 +149,8 @@ export default function RetrieveGiftCardPage() {
              <div className="mt-4 text-sm text-muted-foreground space-y-1 border-t pt-3">
                 <p><strong>Status:</strong> <Badge variant={retrievedCard.status === 'active' ? 'default' : 'secondary'} className="capitalize">{retrievedCard.status || 'N/A'}</Badge></p>
                 {retrievedCard.purchaseDate && <p><strong>Purchase Date:</strong> {new Date(retrievedCard.purchaseDate).toLocaleDateString()}</p>}
-                {retrievedCard.deliveryEmail && <p><strong>Original Delivery Email:</strong> {retrievedCard.deliveryEmail}</p>}
+                {retrievedCard.deliveryEmail && <p><strong>Recipient Email:</strong> {retrievedCard.deliveryEmail}</p>}
+                {retrievedCard.senderEmail && <p><strong>Sender Email:</strong> {retrievedCard.senderEmail}</p>}
              </div>
           </CardContent>
           <CardFooter className="text-center">
@@ -159,3 +161,4 @@ export default function RetrieveGiftCardPage() {
     </div>
   );
 }
+

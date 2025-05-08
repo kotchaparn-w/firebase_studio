@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -64,7 +65,8 @@ export default function PurchasedCardsPage() {
       (card.cardNumber?.toLowerCase().includes(lowerSearchTerm)) ||
       (card.recipientName.toLowerCase().includes(lowerSearchTerm)) ||
       (card.senderName.toLowerCase().includes(lowerSearchTerm)) ||
-      (card.deliveryEmail?.toLowerCase().includes(lowerSearchTerm));
+      (card.deliveryEmail?.toLowerCase().includes(lowerSearchTerm)) ||
+      (card.senderEmail?.toLowerCase().includes(lowerSearchTerm)); // Added senderEmail search
 
     const matchesStatus = card.status ? statusFilter[card.status] : true;
 
@@ -98,14 +100,15 @@ export default function PurchasedCardsPage() {
     const details = `
       Card #: ${card.cardNumber || 'N/A'}
       Recipient: ${card.recipientName}
+      Recipient Email: ${card.deliveryEmail || 'N/A (Download only)'}
       Sender: ${card.senderName}
+      Sender Email: ${card.senderEmail}
       Amount: $${card.amount.toFixed(2)}
       Occasion: ${card.occasion}
       Message: ${card.message || 'None'}
       Design ID: ${card.designId}
       Purchase Date: ${card.purchaseDate ? new Date(card.purchaseDate).toLocaleDateString() : 'N/A'}
       Status: ${card.status || 'N/A'}
-      Delivery Email: ${card.deliveryEmail || 'N/A (Download only)'}
       Note to Staff: ${card.noteToStaff || 'None'}
       Payment Last 4: ${card.paymentMethodLast4 || 'N/A'}
     `;
@@ -181,11 +184,12 @@ export default function PurchasedCardsPage() {
                     <TableHead className="w-[120px]">Card #</TableHead>
                     <TableHead>Recipient</TableHead>
                     <TableHead>Sender</TableHead>
+                    <TableHead>Sender Email</TableHead> {/* Added Sender Email column */}
                     <TableHead className="text-right w-[80px]">Amount</TableHead>
                     <TableHead className="w-[120px]">Occasion</TableHead>
                     <TableHead className="w-[120px]">Purchase Date</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead>Delivery</TableHead>
+                    <TableHead>Recipient Email</TableHead> {/* Renamed from Delivery */}
                     <TableHead className="text-center w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -195,6 +199,7 @@ export default function PurchasedCardsPage() {
                       <TableCell className="font-medium truncate">{card.cardNumber || 'N/A'}</TableCell>
                       <TableCell className="truncate">{card.recipientName}</TableCell>
                       <TableCell className="truncate">{card.senderName}</TableCell>
+                      <TableCell className="truncate">{card.senderEmail}</TableCell> {/* Added Sender Email cell */}
                       <TableCell className="text-right">${card.amount.toFixed(2)}</TableCell>
                       <TableCell className="truncate">{card.occasion}</TableCell>
                       <TableCell>{card.purchaseDate ? new Date(card.purchaseDate).toLocaleDateString() : 'N/A'}</TableCell>
@@ -205,7 +210,7 @@ export default function PurchasedCardsPage() {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="truncate">{card.deliveryEmail ? `Email` : 'Download'}</TableCell>
+                      <TableCell className="truncate">{card.deliveryEmail ? card.deliveryEmail : 'N/A'}</TableCell>
                       <TableCell className="text-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -238,3 +243,4 @@ export default function PurchasedCardsPage() {
     </div>
   );
 }
+

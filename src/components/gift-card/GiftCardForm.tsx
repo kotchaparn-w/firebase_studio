@@ -20,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const formSchema = z.object({
   recipientName: z.string().min(2, { message: "Recipient's name must be at least 2 characters." }),
   senderName: z.string().min(2, { message: "Sender's name must be at least 2 characters." }),
+  senderEmail: z.string().email({ message: "Please enter a valid sender email." }), // Added sender email
   message: z.string().max(90, { message: "Message cannot exceed 90 characters." }).optional(),
   amountType: z.enum(['custom', 'package']),
   amount: z.number().positive("Amount must be positive."),
@@ -27,8 +28,7 @@ const formSchema = z.object({
   selectedPackageName: z.string().optional(),
   occasion: z.string().min(1, { message: "Please select an occasion." }),
   designId: z.string().min(1, { message: "Please select a design." }),
-  // Make email required
-  deliveryEmail: z.string().email({ message: "Please enter a valid email for delivery." }),
+  deliveryEmail: z.string().email({ message: "Please enter a valid recipient email for delivery." }), // Updated message
   noteToStaff: z.string().max(150, { message: "Note to staff cannot exceed 150 characters." }).optional(),
 }).refine(data => {
   if (data.amountType === 'custom') {
@@ -95,6 +95,9 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
        if (name === 'deliveryEmail') {
            form.trigger('deliveryEmail');
        }
+       if (name === 'senderEmail') { // Also trigger sender email validation
+           form.trigger('senderEmail');
+       }
     });
     return () => subscription.unsubscribe();
   }, [form, onFormChange]);
@@ -136,7 +139,7 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
       {/* Increased overall spacing from space-y-8 to space-y-10 */}
       <div className="space-y-10">
 
-        {/* MOVED: Select Theme Field */}
+        {/* Select Theme Field - MOVED TO TOP */}
         <FormField
           control={form.control}
           name="designId"
@@ -175,6 +178,7 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
           )}
         />
 
+        {/* Recipient Info */}
         <FormField
           control={form.control}
           name="recipientName"
@@ -188,22 +192,6 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="senderName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Sender's Name</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., John Smith" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-         {/* MOVED Recipient's Email */}
         <FormField
           control={form.control}
           name="deliveryEmail"
@@ -219,7 +207,36 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
           )}
         />
 
-        {/* Amount Type Selection */}
+        {/* Sender Info */}
+        <FormField
+          control={form.control}
+          name="senderName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sender's Name</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., John Smith" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="senderEmail"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sender's Email</FormLabel>
+              <FormControl>
+                 <Input type="email" placeholder="sender@example.com" {...field} onBlur={() => form.trigger('senderEmail')}/>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
+         {/* Amount Type Selection */}
         <FormField
             control={form.control}
             name="amountType"
@@ -367,10 +384,6 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
           )}
         />
 
-        {/* MOVED TO TOP */}
-        {/* <FormField ... designId ... /> */}
-
-
         <FormField
           control={form.control}
           name="message"
@@ -396,22 +409,6 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
           )}
         />
 
-         {/* MOVED UP */}
-        {/* <FormField
-          control={form.control}
-          name="deliveryEmail"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Recipient's Email (Optional)</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="recipient@example.com" {...field} />
-              </FormControl>
-              <FormDescription>Leave blank if you prefer to download and print the gift card yourself.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
-
         <FormField
           control={form.control}
           name="noteToStaff"
@@ -431,3 +428,4 @@ export default function GiftCardForm({ form, designTemplates, spaPackages, isLoa
     </Form>
   );
 }
+

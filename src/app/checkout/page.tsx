@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
@@ -45,7 +46,7 @@ function CheckoutPageContent() {
             mergedData.designId = 'template1'; // Default fallback
         }
         // Basic validation: Ensure essential fields exist after merge
-        if (!mergedData.recipientName || !mergedData.senderName || !mergedData.deliveryEmail) {
+        if (!mergedData.recipientName || !mergedData.senderName || !mergedData.deliveryEmail || !mergedData.senderEmail) { // Added senderEmail check
            console.warn("Loaded incomplete gift card data, redirecting.");
            throw new Error("Incomplete gift card data.");
         }
@@ -74,11 +75,11 @@ function CheckoutPageContent() {
   const handlePaymentSuccess = async (paymentMethodId: string) => {
     setIsLoading(true);
 
-    // Ensure email is present before proceeding (should be caught by form validation, but double-check)
-     if (!giftCardData.deliveryEmail) {
+    // Ensure emails are present before proceeding (should be caught by form validation, but double-check)
+     if (!giftCardData.deliveryEmail || !giftCardData.senderEmail) { // Added senderEmail check
         toast({
             title: "Missing Information",
-            description: "Recipient email is required.",
+            description: "Recipient and Sender email are required.",
             variant: "destructive",
         });
         setIsLoading(false);
@@ -136,11 +137,20 @@ function CheckoutPageContent() {
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
 
-        // Always send email now
+        // Send gift card email to recipient
         await sendEmail(
           finalGiftCardData.deliveryEmail,
-          `Your Gift Card from ${finalGiftCardData.senderName}`,
-          `Dear ${finalGiftCardData.recipientName},\n\nYou have received a gift card for The Luxurious Spa for $${finalGiftCardData.amount}.\n\nMessage: ${finalGiftCardData.message}\n\nOccasion: ${finalGiftCardData.occasion}\nCard Number: ${finalGiftCardData.cardNumber}\n\nEnjoy your luxurious experience!\n\nFrom, ${finalGiftCardData.senderName}`
+          `You've Received a Gift Card from ${finalGiftCardData.senderName}!`,
+          `Dear ${finalGiftCardData.recipientName},\n\nYou have received a gift card for The Luxurious Spa for $${finalGiftCardData.amount.toFixed(2)}.\n\nMessage: ${finalGiftCardData.message}\n\nOccasion: ${finalGiftCardData.occasion}\nCard Number: ${finalGiftCardData.cardNumber}\n\nEnjoy your luxurious experience!\n\nFrom, ${finalGiftCardData.senderName}`
+          // Consider adding the PDF as an attachment or link
+        );
+
+        // Send order confirmation email to sender
+        await sendEmail(
+          finalGiftCardData.senderEmail,
+          `Your Gift Spa Order Confirmation`,
+          `Dear ${finalGiftCardData.senderName},\n\nThank you for your purchase! You sent a gift card for $${finalGiftCardData.amount.toFixed(2)} to ${finalGiftCardData.recipientName}.\n\nRecipient Email: ${finalGiftCardData.deliveryEmail}\nOccasion: ${finalGiftCardData.occasion}\nCard Number: ${finalGiftCardData.cardNumber}\n\nWe appreciate your business!`
+          // Consider adding the PDF as an attachment or link
         );
 
 
@@ -150,7 +160,7 @@ function CheckoutPageContent() {
 
         toast({
           title: "Payment Successful!",
-          description: "Your gift card has been processed and emailed.",
+          description: "Your gift card has been processed and emailed to the recipient. A confirmation has been sent to your email.",
         });
 
       } else {

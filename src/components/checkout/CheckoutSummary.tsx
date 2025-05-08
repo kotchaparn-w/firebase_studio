@@ -18,9 +18,17 @@ export default function CheckoutSummary({ data, selectedDesign }: CheckoutSummar
           <span>Recipient:</span>
           <span className="font-medium text-foreground">{data.recipientName}</span>
         </div>
+         <div className="flex justify-between">
+          <span>Recipient Email:</span>
+          <span className="font-medium text-foreground">{data.deliveryEmail}</span>
+        </div>
         <div className="flex justify-between">
           <span>Sender:</span>
           <span className="font-medium text-foreground">{data.senderName}</span>
+        </div>
+         <div className="flex justify-between">
+          <span>Sender Email:</span>
+          <span className="font-medium text-foreground">{data.senderEmail}</span>
         </div>
         <div className="flex justify-between">
           <span>Occasion:</span>
@@ -44,11 +52,7 @@ export default function CheckoutSummary({ data, selectedDesign }: CheckoutSummar
             <span className="font-medium text-foreground">{selectedDesign.name}</span>
           </div>
         )}
-        {/* Email is mandatory now */}
-        <div className="flex justify-between">
-          <span>Delivery Email:</span>
-          <span className="font-medium text-foreground">{data.deliveryEmail}</span>
-        </div>
+
         {data.message && (
           <div>
             <p>Message:</p>
