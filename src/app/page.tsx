@@ -122,8 +122,9 @@ export default function HomePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
         {/* Preview uses the watched giftCardData state */}
-        <div className={`${!isMobile ? 'lg:sticky top-24' : ''} shadow-xl`}>
-          <Card>
+        {/* Order changed for mobile: preview is below form */}
+        <div className={`shadow-xl order-2 lg:order-1 ${!isMobile ? 'lg:sticky top-24' : ''}`}>
+          <Card >
              <CardHeader>
               <CardTitle className="font-heading font-bold text-3xl">Live Preview</CardTitle>
               <CardDescription>See your gift card design update in real-time.</CardDescription>
@@ -134,7 +135,8 @@ export default function HomePage() {
           </Card>
          </div>
 
-        <div className="space-y-6">
+        {/* Order changed for mobile: form is above preview */}
+        <div className="space-y-6 order-1 lg:order-2">
           <Card className="shadow-xl">
             <CardHeader>
               <CardTitle className="font-heading font-bold text-3xl">Customize Your Gift Card</CardTitle>
