@@ -10,8 +10,8 @@ interface CheckoutSummaryProps {
 export default function CheckoutSummary({ data, selectedDesign }: CheckoutSummaryProps) {
   return (
     <div className="space-y-4 p-1">
-      <h3 className="font-heading text-xl font-semibold text-foreground">Gift Card Details</h3>
-      
+      <h3 className="font-heading font-bold text-xl text-foreground">Gift Card Details</h3>
+
       <div className="space-y-2 text-sm text-muted-foreground">
         <div className="flex justify-between">
           <span>Recipient:</span>
@@ -34,7 +34,7 @@ export default function CheckoutSummary({ data, selectedDesign }: CheckoutSummar
         {data.message && (
           <div>
             <p>Message:</p>
-            <blockquote className="mt-1 border-l-2 pl-3 italic text-foreground">
+            <blockquote className="mt-1 border-l-2 pl-3 italic text-foreground break-words">
               "{data.message}"
             </blockquote>
           </div>

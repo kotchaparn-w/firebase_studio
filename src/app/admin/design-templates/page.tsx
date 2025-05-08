@@ -101,7 +101,7 @@ export default function DesignTemplatesPage() {
         <CardHeader className="border-b">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <CardTitle className="font-heading text-3xl text-primary">Manage Gift Card Designs</CardTitle>
+              <CardTitle className="font-heading font-bold text-3xl text-primary">Manage Gift Card Designs</CardTitle>
               <CardDescription>Upload, view, and manage design templates for customer gift cards.</CardDescription>
             </div>
             <Dialog open={isFormOpen} onOpenChange={(isOpen) => {
@@ -122,7 +122,7 @@ export default function DesignTemplatesPage() {
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)}>
                     <DialogHeader>
-                      <DialogTitle className="font-heading text-2xl">{editingTemplate ? 'Edit' : 'Add New'} Design Template</DialogTitle>
+                      <DialogTitle className="font-heading font-bold text-2xl">{editingTemplate ? 'Edit' : 'Add New'} Design Template</DialogTitle>
                       <DialogDescription>
                         {editingTemplate ? 'Modify the details of this template.' : 'Fill in the details for the new gift card design template.'}
                       </DialogDescription>
@@ -248,7 +248,7 @@ export default function DesignTemplatesPage() {
 
       <Card className="mt-8 shadow-lg">
         <CardHeader>
-            <CardTitle className="font-heading text-2xl text-primary">Special: "Just Because" Designs</CardTitle>
+            <CardTitle className="font-heading font-bold text-2xl text-primary">Special: "Just Because" Designs</CardTitle>
             <CardDescription>Quickly find designs perfect for a spontaneous gift.</CardDescription>
         </CardHeader>
         <CardContent>

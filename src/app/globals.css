@@ -6,9 +6,12 @@ body {
   font-family: var(--font-lora), Arial, Helvetica, sans-serif;
 }
 
+/* Remove this rule, as it's now defined in tailwind.config.ts */
+/*
 .font-heading {
   font-family: var(--font-cinzel-decorative), serif;
 }
+*/
 
 @layer base {
   :root {
@@ -92,7 +95,7 @@ body {
     --chart-3: 45 70% 65%;
     --chart-4: 250 55% 60%;
     --chart-5: 300 50% 55%;
-    
+
     --sidebar-background: 260 30% 12%;
     --sidebar-foreground: 260 70% 95%;
     --sidebar-primary: 265 60% 55%;

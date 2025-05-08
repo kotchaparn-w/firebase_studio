@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
-import { Cinzel_Decorative, Lora } from 'next/font/google';
+import { Playfair_Display, Lora } from 'next/font/google'; // Import Playfair Display
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { cn } from '@/lib/utils';
 
-const cinzelDecorative = Cinzel_Decorative({
+// Initialize Playfair Display
+const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
-  weight: ['400', '700', '900'],
-  variable: '--font-cinzel-decorative',
+  weight: ['400', '700', '900'], // Include bold weights
+  variable: '--font-playfair-display', // Use a new variable name
 });
 
 const lora = Lora({
@@ -36,7 +37,7 @@ export default function RootLayout({
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
           lora.variable,
-          cinzelDecorative.variable
+          playfairDisplay.variable // Apply Playfair Display variable
         )}
       >
         <div className="relative flex min-h-screen flex-col">

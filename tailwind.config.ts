@@ -12,7 +12,7 @@ export default {
   	extend: {
       fontFamily: {
         sans: ['var(--font-lora)', ...defaultTheme.fontFamily.sans],
-        heading: ['var(--font-cinzel-decorative)', ...defaultTheme.fontFamily.serif], // Ensure heading font is explicitly defined
+        heading: ['var(--font-playfair-display)', ...defaultTheme.fontFamily.serif], // Use Playfair Display variable
       },
   		colors: {
   			background: 'hsl(var(--background))',

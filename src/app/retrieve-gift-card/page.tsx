@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import GiftCardPreview from '@/components/gift-card/GiftCardPreview';
 import type { GiftCardData, DesignTemplate } from '@/lib/types';
-import { initialDesignTemplates } from '@/lib/mockData'; 
+import { initialDesignTemplates } from '@/lib/mockData';
 import { generateGiftCardNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
@@ -39,33 +39,37 @@ export default function RetrieveGiftCardPage() {
 
   const handleRetrieveCard = async (values: RetrievalFormValues) => {
     setIsLoading(true);
-    setRetrievedCard(null); 
+    setRetrievedCard(null);
 
-    await new Promise(resolve => setTimeout(resolve, 1500)); 
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     // In a real app, this would be an API call to your backend.
     // The backend would query MongoDB based on email and a HASH of lastFourDigits or a token.
-    // For this mock, we check against predefined values.
-    if (values.email.toLowerCase() === "buyer@example.com" && values.lastFourDigits === "1234") {
-      const baseMockCardData: Omit<GiftCardData, 'cardNumber' | 'id' | 'purchaseDate' | 'status' | 'paymentMethodLast4'> = {
-        recipientName: "Jane Doe (Retrieved)",
-        senderName: "John Smith (Buyer)",
-        message: "Enjoy this special treat!",
-        amount: 75,
-        occasion: "Birthday",
-        designId: designTemplates[0]?.id || 'template1', 
-        deliveryEmail: "jane.doe@example.com", 
-        noteToStaff: "Loves lavender scent." 
-      };
-      const mockCardData: GiftCardData = {
-        ...baseMockCardData,
-        id: 'retrieved_mock_id_123',
-        cardNumber: generateGiftCardNumber(baseMockCardData),
-        purchaseDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(), // 5 days ago
-        status: 'active',
-        paymentMethodLast4: '1234'
+    // For this mock, we check against predefined values from localStorage or initial mock.
+    const storedPurchasesString = localStorage.getItem('mockPurchasedCards');
+    let allCards: GiftCardData[] = initialDesignTemplates.length > 0 ? [...mockPurchasedCards] : []; // Start with mocks if designs exist
+    if(storedPurchasesString) {
+      try {
+        const storedPurchases = JSON.parse(storedPurchasesString);
+        if(Array.isArray(storedPurchases)) {
+          // Merge and remove duplicates by ID, prioritizing localStorage
+          const combined = [...storedPurchases, ...allCards];
+           allCards = Array.from(new Map(combined.map(card => [card.id || card.cardNumber, card])).values());
+        }
+      } catch(e) {
+        console.error("Error parsing mockPurchasedCards from localStorage", e);
       }
-      setRetrievedCard(mockCardData);
+    }
+
+    // Find card matching email and last four (using mock paymentMethodLast4)
+    const foundCard = allCards.find(card =>
+        card.deliveryEmail?.toLowerCase() === values.email.toLowerCase() &&
+        card.paymentMethodLast4 === values.lastFourDigits
+    );
+
+
+    if (foundCard) {
+      setRetrievedCard(foundCard);
       toast({
         title: "Gift Card Found",
         description: "Displaying your purchased gift card.",
@@ -77,7 +81,7 @@ export default function RetrieveGiftCardPage() {
         variant: "destructive",
       });
     }
-    
+
     setIsLoading(false);
   };
 
@@ -85,7 +89,7 @@ export default function RetrieveGiftCardPage() {
     <div className="max-w-md mx-auto">
       <Card className="shadow-xl">
         <CardHeader>
-          <CardTitle className="font-heading text-3xl text-center text-primary">Retrieve Your Gift Card</CardTitle>
+          <CardTitle className="font-heading font-bold text-3xl text-center text-primary">Retrieve Your Gift Card</CardTitle>
           <CardDescription className="text-center">
             Enter the email address used for purchase and the last four digits of the payment card.
           </CardDescription>
@@ -137,7 +141,7 @@ export default function RetrieveGiftCardPage() {
       {retrievedCard && !isLoading && (
         <Card className="mt-8 shadow-xl">
           <CardHeader>
-            <CardTitle className="font-heading text-2xl text-center">Your Gift Card</CardTitle>
+            <CardTitle className="font-heading font-bold text-2xl text-center">Your Gift Card</CardTitle>
           </CardHeader>
           <CardContent>
             <GiftCardPreview data={retrievedCard} designTemplates={designTemplates} />

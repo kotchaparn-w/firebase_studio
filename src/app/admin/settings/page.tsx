@@ -5,12 +5,12 @@ export default function AdminSettingsPage() {
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle className="font-heading text-3xl text-primary">Admin Settings</CardTitle>
+          <CardTitle className="font-heading font-bold text-3xl text-primary">Admin Settings</CardTitle>
           <CardDescription>Configure application-wide settings for the gift card system.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-muted-foreground">
-            This section is a placeholder for various administrative settings. 
+            This section is a placeholder for various administrative settings.
             Future settings could include:
           </p>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
@@ -24,12 +24,12 @@ export default function AdminSettingsPage() {
           </ul>
           <Card className="bg-destructive/10 border-destructive/30">
             <CardHeader>
-                <CardTitle className="text-destructive text-lg">Important Security Note</CardTitle>
+                <CardTitle className="text-destructive text-lg font-bold">Important Security Note</CardTitle> {/* Added font-bold */}
             </CardHeader>
             <CardContent>
                 <p className="text-sm text-destructive-foreground">
-                    For security reasons, sensitive information like API keys should be managed through environment variables 
-                    or a secure configuration service (e.g., HashiCorp Vault, Google Secret Manager). 
+                    For security reasons, sensitive information like API keys should be managed through environment variables
+                    or a secure configuration service (e.g., HashiCorp Vault, Google Secret Manager).
                     Do not expose or make them directly editable here unless proper masking, audit trails, and robust access controls are in place.
                 </p>
             </CardContent>

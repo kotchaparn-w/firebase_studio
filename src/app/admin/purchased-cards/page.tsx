@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { GiftCardData } from '@/lib/types';
-import { mockPurchasedCards } from '@/lib/mockData'; 
+import { mockPurchasedCards } from '@/lib/mockData';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ export default function PurchasedCardsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
-  
+
   type CardStatus = NonNullable<GiftCardData['status']>;
   const initialStatusFilter: Record<CardStatus, boolean> = {
     active: true,
@@ -57,15 +57,15 @@ export default function PurchasedCardsPage() {
       setIsLoading(false);
     }, 1000);
   }, []);
-  
+
   const filteredCards = purchasedCards.filter(card => {
     const lowerSearchTerm = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       (card.cardNumber?.toLowerCase().includes(lowerSearchTerm)) ||
       (card.recipientName.toLowerCase().includes(lowerSearchTerm)) ||
       (card.senderName.toLowerCase().includes(lowerSearchTerm)) ||
       (card.deliveryEmail?.toLowerCase().includes(lowerSearchTerm));
-    
+
     const matchesStatus = card.status ? statusFilter[card.status] : true;
 
     return matchesSearch && matchesStatus;
@@ -117,7 +117,7 @@ export default function PurchasedCardsPage() {
     return (
       <Card className="shadow-xl">
         <CardHeader>
-          <CardTitle className="font-heading text-3xl text-primary">Purchased Gift Cards</CardTitle>
+          <CardTitle className="font-heading font-bold text-3xl text-primary">Purchased Gift Cards</CardTitle>
           <CardDescription>Loading records of all purchased gift cards...</CardDescription>
         </CardHeader>
         <CardContent className="text-center py-10">
@@ -134,7 +134,7 @@ export default function PurchasedCardsPage() {
         <CardHeader className="border-b">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <CardTitle className="font-heading text-3xl text-primary">Purchased Gift Cards</CardTitle>
+              <CardTitle className="font-heading font-bold text-3xl text-primary">Purchased Gift Cards</CardTitle>
               <CardDescription>View and manage records of all purchased gift cards. Data is currently mocked.</CardDescription>
             </div>
             <Button variant="outline" onClick={handleExport}>
@@ -144,7 +144,7 @@ export default function PurchasedCardsPage() {
         </CardHeader>
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <Input 
+            <Input
               placeholder="Search by card #, name, email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -218,6 +218,7 @@ export default function PurchasedCardsPage() {
                             <DropdownMenuItem onClick={() => handleViewDetails(card)}>
                               <Eye className="mr-2 h-4 w-4" /> View Details
                             </DropdownMenuItem>
+                            {/* Add other actions like 'Mark Redeemed', 'Resend Email' etc. later */}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

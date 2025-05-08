@@ -16,12 +16,13 @@ function OrderConfirmationContent() {
   useEffect(() => {
     const url = searchParams.get('pdfUrl');
     const sent = searchParams.get('emailSent') === 'true';
-    
+
     if (url) {
       setPdfUrl(decodeURIComponent(url));
     } else {
       // If no PDF URL, something might be wrong, or it's a different kind of confirmation.
       // For this app, it's expected. Redirect if crucial info missing.
+      // console.warn("No PDF URL found in query parameters for order confirmation.");
       // router.push('/'); // Optional: redirect if critical info is missing
     }
     setEmailSent(sent);
@@ -29,17 +30,26 @@ function OrderConfirmationContent() {
     // Cleanup Blob URL when component unmounts
     return () => {
       if (url) {
-        URL.revokeObjectURL(decodeURIComponent(url));
+        // Check if the URL is a blob URL before revoking
+        if (url.startsWith('blob:')) {
+             try {
+                URL.revokeObjectURL(decodeURIComponent(url));
+             } catch (error) {
+                 console.error("Error revoking Object URL:", error);
+             }
+        }
       }
     };
   }, [searchParams, router]);
 
 
-  if (!pdfUrl && !emailSent && typeof window !== 'undefined' && !searchParams.get('pdfUrl') && !searchParams.get('emailSent')) {
-    // This helps prevent flashing content if accessed directly without params
-    // This could be more robust by checking if we came from checkout
-    return <div className="text-center py-10">Loading confirmation details...</div>;
+  // Improved loading state check
+  const isLoading = typeof window !== 'undefined' && (!searchParams.has('pdfUrl') && !searchParams.has('emailSent'));
+
+  if (isLoading) {
+      return <div className="text-center py-10">Loading confirmation details...</div>;
   }
+
 
   return (
     <div className="max-w-2xl mx-auto py-12">
@@ -48,7 +58,7 @@ function OrderConfirmationContent() {
           <div className="mx-auto bg-green-100 rounded-full p-3 w-fit mb-4">
             <CheckCircle className="h-12 w-12 text-green-600" />
           </div>
-          <CardTitle className="font-heading text-4xl text-primary">Thank You For Your Order!</CardTitle>
+          <CardTitle className="font-heading font-bold text-4xl text-primary">Thank You For Your Order!</CardTitle>
           <CardDescription className="text-lg text-muted-foreground">
             Your luxurious spa gift card has been successfully processed.
           </CardDescription>
@@ -60,7 +70,7 @@ function OrderConfirmationContent() {
               <p className="text-secondary-foreground">The gift card has been sent to the recipient's email address.</p>
             </div>
           )}
-          
+
           {pdfUrl && (
             <div>
               <p className="mb-2 text-foreground">You can also download a copy of the gift card:</p>
@@ -83,7 +93,7 @@ function OrderConfirmationContent() {
               If you have any questions, please contact our support team.
             </p>
           </div>
-          
+
           <Button variant="outline" asChild className="mt-6">
             <Link href="/">Back to Home</Link>
           </Button>
@@ -95,7 +105,8 @@ function OrderConfirmationContent() {
 
 export default function OrderConfirmationPage() {
   return (
-    <Suspense fallback={<div className="text-center py-10">Loading confirmation...</div>}>
+    // Added Suspense key for potential remount issues
+    <Suspense key={Date.now()} fallback={<div className="text-center py-10">Loading confirmation...</div>}>
       <OrderConfirmationContent />
     </Suspense>
   )

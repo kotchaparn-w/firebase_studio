@@ -58,7 +58,7 @@ export default function GiftCardPreview({ data, designTemplates }: GiftCardPrevi
           {/* Middle section */}
           <div className="text-center my-auto"> {/* Centered vertically */}
             <p className="text-lg text-primary-foreground/90">A Special Gift For</p>
-            <p className="font-heading text-2xl font-semibold text-primary-foreground capitalize truncate drop-shadow-sm">
+            <p className="font-heading text-2xl font-bold text-primary-foreground capitalize truncate drop-shadow-sm">
               {data.recipientName || "Recipient's Name"}
             </p>
           </div>
@@ -66,8 +66,8 @@ export default function GiftCardPreview({ data, designTemplates }: GiftCardPrevi
           {/* Lower-middle section */}
           <div className="text-center">
             {data.message && (
-              // Removed line-clamp-2 to allow full message display with wrapping
-              <p className="text-sm italic text-primary-foreground/80 mb-2 max-w-xs mx-auto break-words">
+              // Allow wrapping and break words
+              <p className="text-sm italic text-primary-foreground/80 mb-2 max-w-xs mx-auto break-words whitespace-pre-wrap">
                 "{data.message}"
               </p>
             )}

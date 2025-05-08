@@ -97,7 +97,7 @@ export default function HomePage() {
   const AdminDesignFeatureInfo = () => (
     <Card className="mt-12 bg-secondary/50 border-dashed">
       <CardHeader>
-        <CardTitle className="font-heading text-lg">For Spa Administrators</CardTitle>
+        <CardTitle className="font-heading font-bold text-lg">For Spa Administrators</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-secondary-foreground">
@@ -112,7 +112,7 @@ export default function HomePage() {
   return (
     <div className="space-y-12">
       <section className="text-center">
-        <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-4">
+        <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-primary mb-4">
           Craft the Perfect Spa Gift
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -125,7 +125,7 @@ export default function HomePage() {
         <div className={`${!isMobile ? 'lg:sticky top-24' : ''} shadow-xl`}>
           <Card>
              <CardHeader>
-              <CardTitle className="font-heading text-3xl">Live Preview</CardTitle>
+              <CardTitle className="font-heading font-bold text-3xl">Live Preview</CardTitle>
               <CardDescription>See your gift card design update in real-time.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -137,7 +137,7 @@ export default function HomePage() {
         <div className="space-y-6">
           <Card className="shadow-xl">
             <CardHeader>
-              <CardTitle className="font-heading text-3xl">Customize Your Gift Card</CardTitle>
+              <CardTitle className="font-heading font-bold text-3xl">Customize Your Gift Card</CardTitle>
               <CardDescription>Fill in the details below to create a unique gift.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -152,7 +152,7 @@ export default function HomePage() {
           {giftCardData.noteToStaff && (
             <Card className="shadow-md border-accent">
               <CardHeader>
-                <CardTitle className="font-heading text-xl text-accent">Note for Spa Staff</CardTitle>
+                <CardTitle className="font-heading font-bold text-xl text-accent">Note for Spa Staff</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground italic">{giftCardData.noteToStaff}</p>

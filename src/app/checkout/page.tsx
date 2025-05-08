@@ -19,7 +19,7 @@ import { generateGiftCardNumber } from '@/lib/utils';
 
 function CheckoutPageContent() {
   const [giftCardData, setGiftCardData] = useState<GiftCardData>(initialGiftCardData);
-  const [designTemplates] = useState<DesignTemplate[]>(initialDesignTemplates); 
+  const [designTemplates] = useState<DesignTemplate[]>(initialDesignTemplates);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -47,29 +47,38 @@ function CheckoutPageContent() {
         router.push('/');
       }
     } else {
+        // If no data, redirect to home page to start over
+        toast({
+          title: "No Gift Card Data",
+          description: "Please create a gift card first.",
+          variant: "destructive",
+        });
         router.push('/');
     }
   }, [router, toast, designTemplates]);
 
   const handlePaymentSuccess = async (paymentMethodId: string) => {
     setIsLoading(true);
-    
+
     const finalGiftCardData: GiftCardData = {
         ...giftCardData,
-        id: `gc_${Date.now()}`, 
+        id: `gc_${Date.now()}`,
         cardNumber: generateGiftCardNumber(giftCardData),
         purchaseDate: new Date().toISOString(),
         status: 'active',
-        paymentMethodLast4: paymentMethodId.length > 4 ? paymentMethodId.slice(-4) : "XXXX" 
+        paymentMethodLast4: paymentMethodId.length > 4 ? paymentMethodId.slice(-4) : "XXXX"
     };
 
     try {
-      const paymentIntent = await createPaymentIntent(finalGiftCardData.amount * 100, 'usd');
-      const confirmedIntent = await confirmPaymentIntent(paymentIntent.id);
+      // In a real scenario, you'd create the payment intent *before* confirming it
+      // For mock, we'll assume it was created and just need confirmation
+      const paymentIntent = await createPaymentIntent(finalGiftCardData.amount * 100, 'usd'); // Mock creating PI
+      const confirmedIntent = await confirmPaymentIntent(paymentIntent.id); // Mock confirming PI
 
       if (confirmedIntent.status === 'succeeded') {
-        
-        // TODO: Save `finalGiftCardData` to MongoDB via an API call
+
+        // Save `finalGiftCardData` to MongoDB via an API call
+        // Placeholder: Log and save to localStorage for demo
         console.log("Mock: Gift card data to save to DB:", finalGiftCardData);
         const existingPurchasesString = localStorage.getItem('mockPurchasedCards');
         let existingPurchases: GiftCardData[] = [];
@@ -108,10 +117,10 @@ function CheckoutPageContent() {
             `Dear ${finalGiftCardData.recipientName},\n\nYou have received a gift card for The Luxurious Spa for $${finalGiftCardData.amount}.\n\nMessage: ${finalGiftCardData.message}\n\nOccasion: ${finalGiftCardData.occasion}\nCard Number: ${finalGiftCardData.cardNumber}\n\nEnjoy your luxurious experience!\n\nFrom, ${finalGiftCardData.senderName}`
           );
         }
-        
-        localStorage.removeItem('giftCardData'); 
+
+        localStorage.removeItem('giftCardData');
         router.push(`/order-confirmation?pdfUrl=${encodeURIComponent(pdfUrl)}&emailSent=${!!finalGiftCardData.deliveryEmail}`);
-        
+
         toast({
           title: "Payment Successful!",
           description: "Your gift card has been processed.",
@@ -132,23 +141,24 @@ function CheckoutPageContent() {
     }
   };
 
-  if (!giftCardData.recipientName && !giftCardData.senderName) { 
-    return <div className="text-center py-10">Loading your gift card details...</div>;
+  // Added loading state check
+  if (!giftCardData.recipientName && !giftCardData.senderName && !isLoading) {
+    return <div className="text-center py-10">Loading your gift card details... If this persists, please return home.</div>;
   }
 
-  const selectedDesign = designTemplates.find(d => d.id === giftCardData.designId) || 
+  const selectedDesign = designTemplates.find(d => d.id === giftCardData.designId) ||
                          (designTemplates.length > 0 ? designTemplates[0] : undefined);
 
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-8 text-center">
+      <h1 className="font-heading font-bold text-4xl md:text-5xl text-primary mb-8 text-center">
         Complete Your Purchase
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="shadow-xl">
           <CardHeader>
-            <CardTitle className="font-heading text-2xl">Order Summary</CardTitle>
+            <CardTitle className="font-heading font-bold text-2xl">Order Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <CheckoutSummary data={giftCardData} selectedDesign={selectedDesign} />
@@ -157,7 +167,7 @@ function CheckoutPageContent() {
 
         <Card className="shadow-xl">
           <CardHeader>
-            <CardTitle className="font-heading text-2xl">Payment Details</CardTitle>
+            <CardTitle className="font-heading font-bold text-2xl">Payment Details</CardTitle>
             <CardDescription>Enter your payment information below. This is a mock payment form.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -165,8 +175,8 @@ function CheckoutPageContent() {
           </CardContent>
           <CardFooter className="flex flex-col items-start space-y-4">
             <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="terms" 
+              <Checkbox
+                id="terms"
                 checked={termsAccepted}
                 onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
                 aria-labelledby="terms-label"
@@ -175,10 +185,10 @@ function CheckoutPageContent() {
                 I agree to the <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="underline text-primary hover:text-primary/80">Terms and Conditions</a>.
               </Label>
             </div>
-            <Button 
-              type="submit" 
-              form="payment-form" 
-              className="w-full bg-accent text-accent-foreground hover:bg-accent/90" 
+            <Button
+              type="submit"
+              form="payment-form"
+              className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
               disabled={!termsAccepted || isLoading}
             >
               {isLoading ? 'Processing...' : `Pay $${giftCardData.amount.toFixed(2)}`}
