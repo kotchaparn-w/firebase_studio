@@ -66,8 +66,8 @@ export default function GiftCardPreview({ data, designTemplates }: GiftCardPrevi
           {/* Lower-middle section */}
           <div className="text-center">
             {data.message && (
-              // Removed truncate, added line-clamp-2 to allow wrapping
-              <p className="text-sm italic text-primary-foreground/80 mb-2 max-w-xs mx-auto line-clamp-2 h-[2.5em]"> {/* Approx height for 2 lines */}
+              // Removed fixed height h-[2.5em] to allow line-clamp to manage height
+              <p className="text-sm italic text-primary-foreground/80 mb-2 max-w-xs mx-auto line-clamp-2"> 
                 "{data.message}"
               </p>
             )}
