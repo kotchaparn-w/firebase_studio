@@ -148,7 +148,7 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
           name="designId"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Choose a Design</FormLabel>
+              <FormLabel>Select Theme</FormLabel>
               {designTemplates.length > 0 ? (
                 <FormControl>
                   <RadioGroup
