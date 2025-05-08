@@ -195,7 +195,7 @@ export default function GiftCardForm({ form, designTemplates, onFormChange }: Gi
                  {showRemaining ? (
                    <span className={cn(
                        'transition-colors',
-                       remainingChars <= WARNING_THRESHOLD ? 'text-accent font-medium' : 'text-muted-foreground'
+                       remainingChars <= WARNING_THRESHOLD ? 'text-destructive font-medium' : 'text-muted-foreground' // Changed from text-accent to text-destructive
                     )}>
                      {remainingChars} characters remaining.
                    </span>
