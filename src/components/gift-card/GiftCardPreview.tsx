@@ -78,7 +78,7 @@ export default function GiftCardPreview({ data, designTemplates }: GiftCardPrevi
             {data.message && (
               // Allow wrapping and break words
               <p className="text-sm italic text-primary-foreground/80 mb-2 max-w-xs mx-auto break-words whitespace-pre-wrap">
-                "{data.message}"
+                {data.message}
               </p>
             )}
             <p className="text-sm text-primary-foreground/90">From: {data.senderName || "Sender's Name"}</p>
